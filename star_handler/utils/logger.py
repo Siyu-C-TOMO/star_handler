@@ -14,7 +14,26 @@ from pathlib import Path
 from datetime import datetime
 from functools import wraps
 from typing import Optional, Callable
-import requests
+from slack_bolt import App
+
+class SlackNotifier:
+    """Handles Slack notifications using Bolt framework."""
+    
+    def __init__(self):
+        self.app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
+        self.default_channel = "@U03DENW0RPV"
+        
+    def send(self, message: str, channel: Optional[str] = None) -> bool:
+        """Send message to Slack channel or DM."""
+        try:
+            response = self.app.client.chat_postMessage(
+                channel=channel or self.default_channel,
+                text=message
+            )
+            return response["ok"]
+        except Exception as e:
+            print(f"Failed to send Slack message: {e}")
+            return False
 
 class LogConfig:
     """Configuration for logging system.
@@ -33,7 +52,14 @@ class LogConfig:
     LOG_DIR = Path("/data/Users/Siyu/Scripts/star_handler/logs")
     LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-    SLACK_WEBHOOK = "https://hooks.slack.com/services/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"
+    _slack_notifier = None
+    
+    @classmethod
+    def get_slack_notifier(cls) -> SlackNotifier:
+        """Get or create Slack notifier instance."""
+        if cls._slack_notifier is None:
+            cls._slack_notifier = SlackNotifier()
+        return cls._slack_notifier
 
 def setup_logger(name: str,
                 log_file: Optional[str] = None,
@@ -90,7 +116,8 @@ def setup_logger(name: str,
 
 def log_execution(func: Optional[Callable] = None,
                  *,
-                 notify: bool = True) -> Callable:
+                 notify: bool = True,
+                 channel: Optional[str] = None) -> Callable:
     """Decorator for logging function execution and optional notification.
     
     [WORKFLOW]
@@ -104,51 +131,47 @@ def log_execution(func: Optional[Callable] = None,
         Function to wrap
     notify : bool
         Whether to send Slack notification
+    channel : Optional[str]
+        Specific Slack channel for notifications
         
     [OUTPUT]
     Callable:
         Wrapped function
         
     [EXAMPLE]
-    >>> @log_execution(notify=True)
+    >>> @log_execution(notify=True, channel="#analysis")
     >>> def process_data():
     >>>     pass
     """
     def decorator(func: Callable) -> Callable:
-        # Use a module-level logger to avoid duplication
         logger_name = f"{func.__module__}.{func.__name__}"
         logger = logging.getLogger(logger_name)
         
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # Log start
             logger.info("Started")
             start_time = datetime.now()
             
             try:
-                # Execute function
                 result = func(*args, **kwargs)
                 
-                # Log completion
                 duration = datetime.now() - start_time
                 logger.info(f"Completed in {duration.total_seconds():.2f}s")
                 
-                # Send notification
                 if notify:
-                    _send_notification(
-                        f"✅ {logger_name} completed in {duration.total_seconds():.2f}s"
+                    LogConfig.get_slack_notifier().send(
+                        f"✅ {logger_name} completed in {duration.total_seconds():.2f}s",
+                        channel=channel
                     )
                     
                 return result
                 
             except Exception as e:
-                # Log error
                 logger.error(f"Failed: {str(e)}")
-                
-                # Send notification
                 if notify:
-                    _send_notification(
-                        f"❌ {logger_name} failed: {str(e)}"
+                    LogConfig.get_slack_notifier().send(
+                        f"❌ {logger_name} failed: {str(e)}",
+                        channel=channel
                     )
                     
                 raise
@@ -157,50 +180,11 @@ def log_execution(func: Optional[Callable] = None,
         
     return decorator(func) if func else decorator
 
-def _send_notification(message: str) -> None:
-    """Send notification to Slack.
-    
-    [WORKFLOW]
-    1. Format message with context
-    2. Send to webhook
-    3. Handle response
-    
-    [PARAMETERS]
-    message : str
-        Message to send
-    """
-    try:
-        # Add context
-        user = os.getlogin()
-        timestamp = datetime.now().strftime(LogConfig.DATE_FORMAT)
-        address = os.getcwd()
-        
-        full_message = (
-            f"{message}\n"
-            f"User: {user}\n"
-            f"Time: {timestamp}\n"
-            f"Directory: {address}"
-        )
-        
-        # Send to Slack
-        response = requests.post(
-            LogConfig.SLACK_WEBHOOK,
-            json={"text": full_message}
-        )
-        
-        if response.status_code != 200:
-            logging.error(f"Slack notification failed: {response.text}")
-            
-    except Exception as e:
-        logging.error(f"Failed to send notification: {str(e)}")
-
-# Configure root logger
 root_logger = setup_logger(
     'star_handler',
     log_file=str(LogConfig.LOG_DIR / 'star_handler.log')
 )
 
-# Example usage in other modules:
 """
 from star_handler.utils.logger import log_execution, setup_logger
 

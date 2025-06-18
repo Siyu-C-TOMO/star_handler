@@ -27,6 +27,7 @@ setup(
         "starfile>=0.4.0",
         "requests>=2.25.0",
         "click>=8.0",
+        "slack-bolt>=1.18.0"
     ],
     entry_points={
         "console_scripts": [
