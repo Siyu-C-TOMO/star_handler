@@ -33,6 +33,25 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+## Configuration
+
+### Slack Notifications
+The package includes built-in Slack notifications for long-running operations. To enable:
+
+1. Create a Slack App in your workspace
+2. Add the Bot Token to your environment:
+```bash
+export SLACK_BOT_TOKEN="xoxb-your-token"
+```
+3. Use the notification decorator in your code:
+```python
+from star_handler.utils.logger import log_execution
+
+@log_execution(notify=True)
+def your_function():
+    pass
+```
+
 ## Quick Start
 
 ### Command Line Interface
