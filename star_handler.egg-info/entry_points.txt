@@ -1,0 +1,2 @@
+[console_scripts]
+star-handler = star_handler.__main__:cli
