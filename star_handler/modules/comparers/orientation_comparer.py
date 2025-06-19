@@ -2,11 +2,12 @@ import numpy as np
 import pandas as pd
 from typing import Tuple
 
-from .base import BaseComparer, AnalysisError
-from ..core.io import format_input_star, format_output_star
-from ..core.transform import add_particle_names, merge_for_match
-from ..core.matrix_math import euler_to_vector, calculate_orientation_angle
-from ..utils.plot import plot_histogram, plot_polar
+from .base import BaseComparer
+from ...utils.errors import AnalysisError
+from ...core.io import format_input_star, format_output_star
+from ...core.transform import add_particle_names, merge_for_match
+from ...core.matrix_math import euler_to_vector, calculate_orientation_angle
+from ...utils.plot import plot_histogram, plot_polar
 
 class OrientationComparer(BaseComparer):
     """

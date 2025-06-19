@@ -8,9 +8,10 @@ from typing import Tuple, Dict, Any, Union
 import numpy as np
 import pandas as pd
 
-from .base import BaseComparer, AnalysisError
-from ..core.io import format_input_star, format_output_star
-from ..core import matrix_math
+from .base import BaseComparer
+from ...utils.errors import AnalysisError
+from ...core.io import format_input_star, format_output_star
+from ...core import matrix_math
 
 class ProximityComparer(BaseComparer):
     """

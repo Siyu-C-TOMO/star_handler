@@ -34,7 +34,7 @@ Custom tag and partial matching:
 """
 
 @click.command(
-    name='star-classify',
+    name='process-classify-by-tomo',
     help=HELP,
     epilog=EPILOG
 )

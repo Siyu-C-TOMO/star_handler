@@ -9,8 +9,8 @@ from typing import Union, Dict, Tuple
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from ..core.io import format_input_star
-from ..utils.logger import setup_logger
+from ...core.io import format_input_star
+from ...utils.logger import setup_logger
 
 class ClassDistribution:
     """

@@ -35,7 +35,7 @@ Split into multiple ranges on rlnDefocusU:
 """
 
 @click.command(
-    name='star-split-by-threshold',
+    name='process-split-by-thres',
     help=HELP,
     epilog=EPILOG
 )

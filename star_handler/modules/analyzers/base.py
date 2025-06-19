@@ -14,35 +14,15 @@ import numpy as np
 import pandas as pd
 from scipy.spatial.distance import pdist, squareform
 
-from ..core.io import format_input_star, format_output_star
-from ..core.transform import scale_coord, m_to_rln, apply_shift
-from ..core.selection import classify_star
-from ..core.parallel import parallel_process_tomograms
+from ...core.io import format_input_star, format_output_star
+from ...core.transform import scale_coord, m_to_rln, apply_shift
+from ...core.selection import classify_star
+from ...core.parallel import parallel_process_tomograms
 from star_handler.utils.logger import setup_logger, log_execution
+from ...core.common_flow import StarHandlerBase
+from ...utils.errors import AnalysisError
 
-class AnalysisError(Exception):
-    """Base exception for analysis errors."""
-    pass
-
-class Base:
-    """Base class for all STAR file operations."""
-    
-    def __init__(self, output_dir: Union[str, Path] = 'analysis'):
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.logger = setup_logger(self.__class__.__name__)
-    
-    def save_results(self, data, name: str):
-        """Save analysis results."""
-        # To be implemented by subclasses
-        raise NotImplementedError
-        
-    def plot_results(self, data, name: str):
-        """Generate plots."""
-        # To be implemented by subclasses
-        raise NotImplementedError
-
-class BaseAnalyzer(Base):
+class BaseAnalyzer(StarHandlerBase):
     """Base class for single STAR file analysis.
     
     [ATTRIBUTES]
@@ -473,29 +453,4 @@ class BaseAnalyzer(Base):
         NotImplementedError:
             If not implemented by subclass
         """
-        raise NotImplementedError
-
-class BaseComparer(Base):
-    """Base class for comparing two STAR files."""
-    
-    def __init__(self, file1: str, file2: str, **kwargs):
-        super().__init__(**kwargs)
-        self.file1 = Path(file1)
-        self.file2 = Path(file2)
-    
-    def compare(self):
-        """Execute comparison workflow."""
-        raise NotImplementedError
-
-class BaseTriComparer(Base):
-    """Base class for comparing three STAR files."""
-    
-    def __init__(self, main_file: str, aux1_file: str, aux2_file: str, **kwargs):
-        super().__init__(**kwargs)
-        self.main_file = Path(main_file)
-        self.aux1_file = Path(aux1_file)
-        self.aux2_file = Path(aux2_file)
-    
-    def compare(self):
-        """Execute triple comparison workflow."""
         raise NotImplementedError

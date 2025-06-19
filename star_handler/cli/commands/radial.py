@@ -1,7 +1,7 @@
 import sys
 import click
 
-from star_handler.analyzers.radial import RadialAnalyzer
+from star_handler.modules.analyzers.radial import RadialAnalyzer
 from star_handler.utils.config import RadialConfig
 from star_handler.utils.logger import setup_logger
 from star_handler.utils.doc_parser import parse_docstring
@@ -11,7 +11,7 @@ logger = setup_logger(__name__)
 HELP, EPILOG = parse_docstring(RadialAnalyzer.__doc__)
 
 @click.command(
-    name='star-radial',
+    name='analyze-radial',
     help=HELP,
     epilog=EPILOG
 )

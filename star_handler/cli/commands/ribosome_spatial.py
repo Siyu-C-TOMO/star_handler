@@ -1,7 +1,7 @@
 import sys
 import click
 
-from star_handler.analyzers.ribosome_spatial import RibosomeSpatialAnalyzer
+from star_handler.modules.analyzers.ribosome_spatial import RibosomeSpatialAnalyzer
 from star_handler.utils.config import (
     RadialConfig,
     ClusterConfig,
@@ -15,7 +15,7 @@ logger = setup_logger(__name__)
 HELP, EPILOG = parse_docstring(RibosomeSpatialAnalyzer.__doc__)
 
 @click.command(
-    name='ribosome-spatial',
+    name='analyze-ribo-spatial',
     help=HELP,
     epilog=EPILOG
 )

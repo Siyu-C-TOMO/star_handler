@@ -1,7 +1,7 @@
 import sys
 import click
 
-from star_handler.processors.template_match import TemplateMatch3DProcessor
+from star_handler.modules.processors.template_match import TemplateMatch3DProcessor
 from star_handler.utils.logger import setup_logger
 from star_handler.utils.doc_parser import parse_docstring
 
@@ -10,7 +10,7 @@ logger = setup_logger(__name__)
 HELP, EPILOG = parse_docstring(TemplateMatch3DProcessor.__doc__)
 
 @click.command(
-    name='process-template-match-3D',
+    name='process-3DTM2relion',
     help=HELP,
     epilog=EPILOG
 )

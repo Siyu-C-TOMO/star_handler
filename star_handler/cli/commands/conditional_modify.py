@@ -1,7 +1,7 @@
 import sys
 import click
 
-from star_handler.processors.conditional_modify import ConditionalModifyProcessor
+from star_handler.modules.processors.conditional_modify import ConditionalModifyProcessor
 from star_handler.utils.logger import setup_logger
 from star_handler.utils.doc_parser import parse_docstring
 
@@ -10,7 +10,7 @@ logger = setup_logger(__name__)
 HELP, EPILOG = parse_docstring(ConditionalModifyProcessor.__doc__)
 
 @click.command(
-    name='star-modify-conditional',
+    name='process-modify-by-match',
     help=HELP,
     epilog=EPILOG
 )

@@ -31,8 +31,8 @@ processor.process()
 from pathlib import Path
 from typing import Union, Optional
 
-from ..utils.errors import FormatError
-from ..utils.logger import setup_logger
+from ...utils.errors import FormatError
+from ...utils.logger import setup_logger
 
 class BaseProcessor:
     """Base class for all star file processors.

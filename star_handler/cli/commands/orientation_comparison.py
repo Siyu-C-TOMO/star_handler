@@ -1,7 +1,7 @@
 import sys
 import click
 
-from star_handler.analyzers.orientation_comparer import OrientationComparer
+from star_handler.modules.comparers.orientation_comparer import OrientationComparer
 from star_handler.utils.logger import setup_logger
 from star_handler.utils.doc_parser import parse_docstring
 
@@ -10,7 +10,7 @@ logger = setup_logger(__name__)
 HELP, EPILOG = parse_docstring(OrientationComparer.__doc__)
 
 @click.command(
-    name='star-compare-orientations',
+    name='compare-orientation',
     help=HELP,
     epilog=EPILOG
 )

@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Union
 
 from .base import BaseProcessor
-from ..utils.errors import FormatError, ProcessingError
-from ..core.io import format_input_star, format_output_star
+from ...utils.errors import FormatError, ProcessingError
+from ...core.io import format_input_star, format_output_star
 
 class ConditionalModifyProcessor(BaseProcessor):
     """

@@ -1,7 +1,7 @@
 import sys
 import click
 
-from star_handler.processors.relion2cbox import Relion2CboxProcessor
+from star_handler.modules.processors.relion2cbox import Relion2CboxProcessor
 from star_handler.utils.config import Relion2CboxConfig
 from star_handler.utils.logger import setup_logger
 from star_handler.utils.doc_parser import parse_docstring
@@ -11,7 +11,7 @@ logger = setup_logger(__name__)
 HELP, EPILOG = parse_docstring(Relion2CboxProcessor.__doc__)
 
 @click.command(
-    name='process-relion2cbox',
+    name='process-relion2cryolo',
     help=HELP,
     epilog=EPILOG
 )

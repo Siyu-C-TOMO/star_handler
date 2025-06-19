@@ -7,11 +7,9 @@ while optimizing data preprocessing by sharing processed results between analyze
 from pathlib import Path
 from typing import Dict, Any, Optional, Union
 
-from star_handler.analyzers import (
-    RadialAnalyzer,
-    ClusterAnalyzer,
-    OrientationAnalyzer
-)
+from .radial import RadialAnalyzer
+from .cluster import ClusterAnalyzer
+from .orientation import OrientationAnalyzer
 from star_handler.utils.logger import setup_logger, log_execution
 
 logger = setup_logger(__name__)

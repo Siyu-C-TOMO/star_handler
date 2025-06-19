@@ -56,88 +56,82 @@ def your_function():
 
 ### Command Line Interface
 
-1.  **Classify particles by metadata tag**:
+1.  **Analyze particle clusters**:
     ```bash
-    star-classify -f particles.star -t rlnClassNumber
+    star-handler analyze-cluster -f particles.star -t 380
     ```
-
-2.  **Analyze radial distribution**:
+2.  **Analyze class distribution**:
     ```bash
-    star-radial -f particles.star -b 50 -m 8000
+    star-handler analyze-class-distribution -f run_it150_data.star
     ```
-
-3.  **Analyze particle clusters**:
+3.  **Analyze particle orientations**:
     ```bash
-    star-cluster -f particles.star -t 380
+    star-handler analyze-orientation -f particles.star
     ```
-
-4.  **Analyze orientations**:
+4.  **Analyze radial distribution**:
     ```bash
-    star-orientation -f particles.star
+    star-handler analyze-radial -f particles.star -b 50 -m 8000
     ```
-
-5.  **Analyze class distribution**:
+5.  **Run comprehensive ribosome spatial analysis**:
     ```bash
-    star-class-distribution -f run_it150_data.star
+    star-handler analyze-ribo-spatial -f particles.star
     ```
-
-6.  **Compare orientations between two STAR files**:
+6.  **Compare particle orientations**:
     ```bash
-    star-compare-orientations --env-star env.star --mem-star mem.star
+    star-handler compare-orientation --env-star env.star --mem-star mem.star
     ```
-
-7.  **Analyze ribosome neighbors**:
+7.  **Compare proximity/neighbor rate**:
     ```bash
-    ribosome-neighbor -f r.star -en entry.star -ex exit.star -r 600
+    star-handler compare-neighbor-rate --star-a set_a.star --star-b set_b.star --threshold 50.0
     ```
-
-8.  **Run comprehensive spatial analysis**:
+8.  **Compare ribosome polysome structure**:
     ```bash
-    ribosome-spatial -f particles.star
+    star-handler compare-ribo-polysome -f r.star -en entry.star -ex exit.star -r 600
     ```
-
-9.  **Conditionally modify a STAR file**:
+9.  **Process and convert 3D Template Matching results**:
     ```bash
-    star-modify-conditional -f p.star -c 1 -s "mic/"
+    star-handler process-3DTM2relion -d /path/to/matching_dir
     ```
-
-10. **Filter a STAR file by a reference**:
+10. **Classify particles by tomogram**:
     ```bash
-    process-filter-by-ref -f full.star -r ref.star
+    star-handler process-classify-by-tomo -f particles.star
     ```
-
-11. **Split a STAR file by a threshold**:
+11. **Filter a STAR file by matching another**:
     ```bash
-    star-split-by-threshold -f p.star -t rlnAngleTilt -th 45.0
+    star-handler process-filter-by-match -f full.star -r ref.star
     ```
-
-12. **Process 3D template matching results**:
+12. **Modify a STAR file based on a condition**:
     ```bash
-    process-template-match-3D -d /path/to/matching_dir
+    star-handler process-modify-by-match -f p.star -c 1 -s "mic/"
     ```
-
-13. **Convert Warp STAR file to RELION format**:
+13. **Convert RELION coordinates to cryoLO format**:
     ```bash
-    process-warp2relion -f warp_particles.star
+    star-handler process-relion2cryolo -f run_data.star -b 4
     ```
-
-14. **Generate CryoLO cbox files from RELION coordinates**:
+14. **Split a STAR file by a value threshold**:
     ```bash
-    process-relion2cbox -f run_data.star -b 4
+    star-handler process-split-by-thres -f p.star -t rlnAngleTilt -th 45.0
+    ```
+15. **Convert a Warp STAR file to RELION format**:
+    ```bash
+    star-handler process-warp2relion -f warp_particles.star
     ```
 
 ### Python API
 
 ```python
-from star_handler.analyzers import (
+from star_handler.modules.analyzers import (
     RadialAnalyzer, ClusterAnalyzer, OrientationAnalyzer, ClassDistribution,
-    OrientationComparer, RibosomeNeighborAnalyzer, RibosomeSpatialAnalyzer
+    RibosomeSpatialAnalyzer
 )
-from star_handler.processors import (
+from star_handler.modules.comparers import (
+    OrientationComparer, RibosomeNeighborComparer, ProximityComparer
+)
+from star_handler.modules.processors import (
     ConditionalModifyProcessor, FilterByRefProcessor, Relion2CboxProcessor,
     TemplateMatch3DProcessor, Warp2RelionProcessor
 )
-from star_handler.core.star_handler import classify_star, split_star_by_threshold
+from star_handler.core.selection import classify_star, split_star_by_threshold
 
 # Classify particles
 classify_star("particles.star", tag="rlnClassNumber")
@@ -166,7 +160,7 @@ comparer = OrientationComparer("env.star", "mem.star")
 comparer.compare()
 
 # Ribosome Neighbor Analysis
-neighbor_analyzer = RibosomeNeighborAnalyzer("r.star", "entry.star", "exit.star")
+neighbor_analyzer = RibosomeNeighborComparer("r.star", "entry.star", "exit.star")
 neighbor_analyzer.process()
 
 # Comprehensive Spatial Analysis

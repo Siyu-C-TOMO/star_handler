@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from star_handler.core.matrix_math import gr, local_density, distance_weighted
-from star_handler.analyzers.base import BaseAnalyzer
+from .base import BaseAnalyzer
 from star_handler.utils.plot import plot_xy, plot_histogram
 from star_handler.utils.config import RadialConfig
 

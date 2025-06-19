@@ -1,7 +1,7 @@
 import sys
 import click
 
-from star_handler.analyzers.orientation import OrientationAnalyzer
+from star_handler.modules.analyzers.orientation import OrientationAnalyzer
 from star_handler.utils.config import OrientationConfig
 from star_handler.utils.logger import setup_logger
 from star_handler.utils.doc_parser import parse_docstring
@@ -11,7 +11,7 @@ logger = setup_logger(__name__)
 HELP, EPILOG = parse_docstring(OrientationAnalyzer.__doc__)
 
 @click.command(
-    name='star-orientation',
+    name='analyze-orientation',
     help=HELP,
     epilog=EPILOG
 )

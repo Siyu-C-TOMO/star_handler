@@ -1,7 +1,7 @@
 import sys
 import click
 
-from star_handler.processors.warp2relion import Warp2RelionProcessor
+from star_handler.modules.processors.warp2relion import Warp2RelionProcessor
 from star_handler.utils.logger import setup_logger
 from star_handler.utils.doc_parser import parse_docstring
 

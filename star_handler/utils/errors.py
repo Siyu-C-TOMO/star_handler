@@ -15,3 +15,7 @@ class ProcessingError(StarFileError):
 class ValidationError(StarFileError):
     """Raised when input validation fails."""
     pass
+
+class AnalysisError(StarFileError):
+    """Base exception for analysis errors."""
+    pass

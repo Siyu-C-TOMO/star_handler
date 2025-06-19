@@ -1,10 +1,10 @@
 from typing import Optional, Tuple
 
 from .base import BaseProcessor
-from ..core.io import format_input_star, format_output_star
-from ..core.transform import scale_coord
-from ..core.selection import threshold_star
-from ..core.parallel import parallel_process_tomograms
+from ...core.io import format_input_star, format_output_star
+from ...core.transform import scale_coord
+from ...core.selection import threshold_star
+from ...core.parallel import parallel_process_tomograms
 
 class TemplateMatch3DProcessor(BaseProcessor):
     """

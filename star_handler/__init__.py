@@ -4,31 +4,33 @@ STAR Handler - A comprehensive toolkit for analyzing RELION STAR files
 
 __version__ = "2.0.0"
 
-from star_handler.analyzers.cluster import ClusterAnalyzer
-from star_handler.analyzers.orientation import OrientationAnalyzer
-from star_handler.analyzers.orientation_comparer import OrientationComparer
-from star_handler.analyzers.radial import RadialAnalyzer
-from star_handler.analyzers.ribosome_neighbor import RibosomeNeighborAnalyzer
-from star_handler.analyzers.ribosome_spatial import RibosomeSpatialAnalyzer
-from star_handler.analyzers.tabulation_class import ClassDistribution
+from .modules.analyzers.cluster import ClusterAnalyzer
+from .modules.analyzers.orientation import OrientationAnalyzer
+from .modules.analyzers.radial import RadialAnalyzer
+from .modules.analyzers.ribosome_spatial import RibosomeSpatialAnalyzer
+from .modules.analyzers.tabulation_class import ClassDistribution
+from .modules.comparers.orientation_comparer import OrientationComparer
+from .modules.comparers.ribosome_neighbor import RibosomeNeighborComparer
+from .modules.comparers.proximity_comparer import ProximityComparer
 
-from star_handler.core.selection import classify_star, split_star_by_threshold
+from .core.selection import classify_star, split_star_by_threshold
 
-from star_handler.processors.conditional_modify import ConditionalModifyProcessor
-from star_handler.processors.filter_by_ref import FilterByRefProcessor
-from star_handler.processors.relion2cbox import Relion2CboxProcessor
-from star_handler.processors.template_match import TemplateMatch3DProcessor
-from star_handler.processors.warp2relion import Warp2RelionProcessor
+from .modules.processors.conditional_modify import ConditionalModifyProcessor
+from .modules.processors.filter_by_ref import FilterByRefProcessor
+from .modules.processors.relion2cbox import Relion2CboxProcessor
+from .modules.processors.template_match import TemplateMatch3DProcessor
+from .modules.processors.warp2relion import Warp2RelionProcessor
 
 
 __all__ = [
     "ClassDistribution",
     "ClusterAnalyzer",
     "OrientationAnalyzer",
-    "OrientationComparer",
     "RadialAnalyzer",
-    "RibosomeNeighborAnalyzer",
     "RibosomeSpatialAnalyzer",
+    "OrientationComparer",
+    "RibosomeNeighborComparer",
+    "ProximityComparer",
     "classify_star",
     "split_star_by_threshold",
     "ConditionalModifyProcessor",

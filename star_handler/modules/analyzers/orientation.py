@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Tuple
 import numpy as np
 import pandas as pd
 
-from star_handler.analyzers.base import BaseAnalyzer
+from .base import BaseAnalyzer
 from star_handler.core.matrix_math import (
     euler_to_vector,
     calculate_orientation_angle

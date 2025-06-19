@@ -3,12 +3,13 @@ from typing import Dict, Any, List, Tuple
 import numpy as np
 import pandas as pd
 
-from star_handler.analyzers.base import BaseAnalyzer, AnalysisError
-from ..core.io import format_input_star
-from star_handler.utils.plot import plot_histogram
-from star_handler.utils.config import RibosomeNeighborConfig
+from ..analyzers.base import BaseAnalyzer
+from ...utils.errors import AnalysisError
+from ...core.io import format_input_star
+from ...utils.plot import plot_histogram
+from ...utils.config import RibosomeNeighborConfig
 
-class RibosomeNeighborAnalyzer(BaseAnalyzer):
+class RibosomeNeighborComparer(BaseAnalyzer):
     """
     Analyze spatial relationships between neighboring ribosomes.
     

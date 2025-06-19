@@ -1,17 +1,17 @@
 import sys
 import click
 
-from star_handler.analyzers.ribosome_neighbor import RibosomeNeighborAnalyzer
+from star_handler.modules.comparers.ribosome_neighbor import RibosomeNeighborComparer
 from star_handler.utils.config import RibosomeNeighborConfig
 from star_handler.utils.logger import setup_logger
 from star_handler.utils.doc_parser import parse_docstring
 
 logger = setup_logger(__name__)
 
-HELP, EPILOG = parse_docstring(RibosomeNeighborAnalyzer.__doc__)
+HELP, EPILOG = parse_docstring(RibosomeNeighborComparer.__doc__)
 
 @click.command(
-    name='ribosome-neighbor',
+    name='compare-ribo-polysome',
     help=HELP,
     epilog=EPILOG
 )
@@ -49,7 +49,7 @@ HELP, EPILOG = parse_docstring(RibosomeNeighborAnalyzer.__doc__)
 )
 def main(star_file: str, entry_star: str, exit_star: str, search_radius: float, bin_size: float):
     try:
-        analyzer = RibosomeNeighborAnalyzer(
+        analyzer = RibosomeNeighborComparer(
             star_file,
             entry_star,
             exit_star,
