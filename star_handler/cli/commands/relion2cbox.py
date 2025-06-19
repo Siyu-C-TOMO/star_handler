@@ -26,7 +26,7 @@ HELP, EPILOG = parse_docstring(Relion2CboxProcessor.__doc__)
     type=int,
     default=Relion2CboxConfig().bin_factor,
     show_default=True,
-    help=f"Unbinning factor for coordinates"
+    help="Unbinning factor for coordinates"
 )
 def main(star_file: str, bin_factor: int):
     try:

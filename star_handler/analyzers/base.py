@@ -14,11 +14,10 @@ import numpy as np
 import pandas as pd
 from scipy.spatial.distance import pdist, squareform
 
-from star_handler.core.star_handler import (
-    format_input_star, format_output_star,
-    scale_coord, m_to_rln, classify_star, apply_shift, 
-    parallel_process_tomograms
-)
+from ..core.io import format_input_star, format_output_star
+from ..core.transform import scale_coord, m_to_rln, apply_shift
+from ..core.selection import classify_star
+from ..core.parallel import parallel_process_tomograms
 from star_handler.utils.logger import setup_logger, log_execution
 
 class AnalysisError(Exception):

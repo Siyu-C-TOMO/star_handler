@@ -26,21 +26,21 @@ HELP, EPILOG = parse_docstring(RadialAnalyzer.__doc__)
     type=float,
     default=RadialConfig().bin_size,
     show_default=True,
-    help=f"Size of distance bins in Angstroms"
+    help="Size of distance bins in Angstroms"
 )
 @click.option(
     "-m", "--max-distance",
     type=float,
     default=RadialConfig().max_distance,
     show_default=True,
-    help=f"Maximum distance to consider"
+    help="Maximum distance to consider"
 )
 @click.option(
     "--min-distance",
     type=float,
     default=RadialConfig().min_distance,
     show_default=True,
-    help=f"Minimum distance to consider"
+    help="Minimum distance to consider"
 )
 def main(star_file: str, bin_size: float, max_distance: float, min_distance: float):
     try:

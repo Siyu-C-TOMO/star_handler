@@ -2,18 +2,24 @@
 Core functionality for STAR file handling and mathematical operations.
 """
 
-from star_handler.core.star_handler import (
+from .io import (
     format_input_star,
     format_output_star,
-    find_tomogram_name,
-    scale_coord,
-    apply_shift,
+)
+from .selection import (
+    classify_star,
+    split_star_by_threshold,
     threshold_star,
-    split_by_tomogram,
+)
+from .transform import (
+    apply_shift,
+    scale_coord,
     add_particle_names,
-    parallel_process_tomograms,
     merge_for_match,
-    m_to_rln
+    m_to_rln,
+)
+from .parallel import (
+    parallel_process_tomograms,
 )
 
 from star_handler.core.matrix_math import (
@@ -26,19 +32,24 @@ from star_handler.core.matrix_math import (
 )
 
 __all__ = [
-    # Star handling functions
+    # I/O
     "format_input_star",
     "format_output_star",
-    "find_tomogram_name",
-    "scale_coord",
-    "apply_shift",
+
+    # Selection
+    "classify_star",
+    "split_star_by_threshold",
     "threshold_star",
-    "split_by_tomogram",
-    "select_correspond_particle",
+
+    # Transform
+    "apply_shift",
+    "scale_coord",
     "add_particle_names",
-    "parallel_process_tomograms",
     "merge_for_match",
     "m_to_rln",
+
+    # Parallel
+    "parallel_process_tomograms",
     
     # Math operations
     "euler_to_vector",

@@ -3,11 +3,8 @@ from typing import Union
 
 from .base import BaseProcessor
 from ..utils.errors import FormatError, ProcessingError
-from ..core.star_handler import (
-    format_input_star,
-    format_output_star,
-    m_to_rln
-)
+from ..core.io import format_input_star, format_output_star
+from ..core.transform import m_to_rln
 
 class Warp2RelionProcessor(BaseProcessor):
     """

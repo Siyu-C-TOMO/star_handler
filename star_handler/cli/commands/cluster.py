@@ -26,14 +26,14 @@ HELP, EPILOG = parse_docstring(ClusterAnalyzer.__doc__)
     type=float,
     default=ClusterConfig().threshold,
     show_default=True,
-    help=f"Distance threshold in Angstroms"
+    help="Distance threshold in Angstroms"
 )
 @click.option(
     "-s", "--min-size",
     type=int,
     default=ClusterConfig().min_cluster_size,
     show_default=True,
-    help=f"Minimum cluster size"
+    help="Minimum cluster size"
 )
 def main(star_file: str, threshold: float, min_size: int):
     try:

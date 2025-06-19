@@ -30,35 +30,35 @@ HELP, EPILOG = parse_docstring(RibosomeSpatialAnalyzer.__doc__)
     type=float,
     default=RadialConfig().bin_size,
     show_default=True,
-    help=f"Size of radial distance bins in Angstroms"
+    help="Size of radial distance bins in Angstroms"
 )
 @click.option(
     "--radial-max-distance",
     type=float,
     default=RadialConfig().max_distance,
     show_default=True,
-    help=f"Maximum radial distance in Angstroms"
+    help="Maximum radial distance in Angstroms"
 )
 @click.option(
     "--cluster-threshold",
     type=float,
     default=ClusterConfig().threshold,
     show_default=True,
-    help=f"Distance threshold for clustering in Angstroms"
+    help="Distance threshold for clustering in Angstroms"
 )
 @click.option(
     "--min-cluster-size",
     type=int,
     default=ClusterConfig().min_cluster_size,
     show_default=True,
-    help=f"Minimum number of particles per cluster"
+    help="Minimum number of particles per cluster"
 )
 @click.option(
     "--angle-bin-width",
     type=float,
     default=OrientationConfig().bin_width,
     show_default=True,
-    help=f"Width of angle bins in degrees"
+    help="Width of angle bins in degrees"
 )
 @click.option(
     "--output-dir",

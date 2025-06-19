@@ -7,14 +7,10 @@ import numpy as np
 import os
 
 from .base import BaseProcessor
-from ..utils.errors import FormatError, ProcessingError
-from ..core.star_handler import (
-    format_input_star,
-    scale_coord, 
-    apply_shift,
-    classify_star,
-    parallel_process_tomograms
-)
+from ..core.io import format_input_star
+from ..core.transform import scale_coord, apply_shift
+from ..core.selection import classify_star
+from ..core.parallel import parallel_process_tomograms
 
 class Relion2CboxProcessor(BaseProcessor):
     """

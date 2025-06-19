@@ -29,7 +29,7 @@ HELP, EPILOG = parse_docstring(FilterByRefProcessor.__doc__)
 @click.option(
     "-o", "--output-dir",
     type=click.Path(file_okay=False, dir_okay=True, writable=True),
-    help=f"Output directory for filtered files"
+    help="Output directory for filtered files"
 )
 def main(star_file: str, ref_star: str, output_dir: str):
     try:

@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 import click
 
-from star_handler.core.star_handler import classify_star
+from star_handler.core.selection import classify_star
 from star_handler.utils.logger import setup_logger
 
 logger = setup_logger(__name__)

@@ -3,12 +3,8 @@ from typing import Union
 
 from .base import BaseProcessor
 from ..utils.errors import FormatError, ProcessingError
-from ..core.star_handler import (
-    format_input_star,
-    format_output_star,
-    add_particle_names,
-    merge_for_match
-)
+from ..core.io import format_input_star, format_output_star
+from ..core.transform import add_particle_names, merge_for_match
 
 class FilterByRefProcessor(BaseProcessor):
     """Filter particles in STAR file based on a reference STAR file.

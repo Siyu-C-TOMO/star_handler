@@ -12,7 +12,7 @@ from star_handler.analyzers.ribosome_neighbor import RibosomeNeighborAnalyzer
 from star_handler.analyzers.ribosome_spatial import RibosomeSpatialAnalyzer
 from star_handler.analyzers.tabulation_class import ClassDistribution
 
-from star_handler.core.star_handler import classify_star, split_star_by_threshold
+from star_handler.core.selection import classify_star, split_star_by_threshold
 
 from star_handler.processors.conditional_modify import ConditionalModifyProcessor
 from star_handler.processors.filter_by_ref import FilterByRefProcessor

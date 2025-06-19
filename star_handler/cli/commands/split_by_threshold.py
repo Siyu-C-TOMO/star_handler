@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 import click
 
-from star_handler.core.star_handler import split_star_by_threshold
+from star_handler.core.selection import split_star_by_threshold
 from star_handler.utils.logger import setup_logger
 
 logger = setup_logger(__name__)

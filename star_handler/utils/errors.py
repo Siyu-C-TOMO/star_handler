@@ -1,17 +1,17 @@
-"""Common error types for star handler processors."""
+"""Common error types for star handler."""
 
-class StarHandlerError(Exception):
-    """Base exception class for star handler errors."""
+class StarFileError(Exception):
+    """Base exception class for all star_handler errors."""
     pass
 
-class FormatError(StarHandlerError):
+class FormatError(StarFileError):
     """Raised when input file format is invalid."""
     pass
 
-class ProcessingError(StarHandlerError):
+class ProcessingError(StarFileError):
     """Raised when processing operations fail."""
     pass
 
-class ValidationError(StarHandlerError):
+class ValidationError(StarFileError):
     """Raised when input validation fails."""
     pass

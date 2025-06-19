@@ -5,8 +5,7 @@ Analyzes angular relationships between particle orientations,
 focusing on nearest-neighbor interactions.
 """
 
-from pathlib import Path
-from typing import Dict, Any, List, Tuple, Union
+from typing import Dict, Any, List, Tuple
 import numpy as np
 import pandas as pd
 

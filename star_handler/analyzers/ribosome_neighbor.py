@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from star_handler.analyzers.base import BaseAnalyzer, AnalysisError
-from star_handler.core.star_handler import format_input_star
+from ..core.io import format_input_star
 from star_handler.utils.plot import plot_histogram
 from star_handler.utils.config import RibosomeNeighborConfig
 

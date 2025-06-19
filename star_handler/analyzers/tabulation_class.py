@@ -7,10 +7,9 @@ breaking down by dataset (optics groups).
 from pathlib import Path
 from typing import Union, Dict, Tuple
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
-from ..core.star_handler import format_input_star
+from ..core.io import format_input_star
 from ..utils.logger import setup_logger
 
 class ClassDistribution:

@@ -176,10 +176,6 @@ class ClusterAnalyzer(BaseAnalyzer):
                     size_data.extend([size] * count)
                     
             if size_data:
-                data_file = self._save_data(
-                    {'Size': size_data},
-                    f"{tomogram}_sizes"
-                )
                 plot_histogram(
                     np.array(size_data),
                     str(self.output_dirs['plots'] / f"{tomogram}_sizes"),
@@ -223,12 +219,6 @@ class ClusterAnalyzer(BaseAnalyzer):
         self._save_data(combined_stats, 'cluster_statistics', prefix='combined')
         
         if all_sizes:
-            size_data = self._save_data(
-                {'Size': all_sizes},
-                'all_sizes',
-                prefix='combined'
-            )
-            
             config = self.CLUSTER_STATS['size']
             plot_histogram(
                 np.array(all_sizes),

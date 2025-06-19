@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from .base import BaseComparer, AnalysisError
-from ..core.star_handler import format_input_star, format_output_star
+from ..core.io import format_input_star, format_output_star
 from ..core import matrix_math
 
 class ProximityComparer(BaseComparer):

@@ -1,12 +1,10 @@
-from typing import Optional, List, Tuple, Dict, Any
+from typing import Optional, Tuple
 
 from .base import BaseProcessor
-from ..utils.errors import FormatError, ProcessingError
-from ..core.star_handler import (
-    format_input_star, format_output_star,
-    scale_coord, threshold_star,
-    parallel_process_tomograms
-)
+from ..core.io import format_input_star, format_output_star
+from ..core.transform import scale_coord
+from ..core.selection import threshold_star
+from ..core.parallel import parallel_process_tomograms
 
 class TemplateMatch3DProcessor(BaseProcessor):
     """
@@ -208,7 +206,7 @@ class TemplateMatch3DProcessor(BaseProcessor):
                 try:
                     low_z, high_z, cc = map(float, parts[1:])
                     params_list.append((prefix, low_z, high_z, cc))
-                except ValueError as e:
+                except ValueError:
                     self.logger.error(f"Invalid numeric values in line: {line.strip()}")
                     continue
         

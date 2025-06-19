@@ -26,14 +26,14 @@ HELP, EPILOG = parse_docstring(OrientationAnalyzer.__doc__)
     type=float,
     default=OrientationConfig().max_angle,
     show_default=True,
-    help=f"Maximum angle to consider"
+    help="Maximum angle to consider"
 )
 @click.option(
     "-b", "--bin-width",
     type=float,
     default=OrientationConfig().bin_width,
     show_default=True,
-    help=f"Width of angle bins"
+    help="Width of angle bins"
 )
 def main(star_file: str, max_angle: float, bin_width: float):
     try:

@@ -26,18 +26,18 @@ HELP, EPILOG = parse_docstring(ClassDistribution.__doc__)
     "-g", "--group-column",
     default=ClassDistributionConfig().group_column,
     show_default=True,
-    help=f"Column defining dataset groups"
+    help="Column defining dataset groups"
 )
 @click.option(
     "-o", "--output",
     default=ClassDistributionConfig().output_file,
     show_default=True,
-    help=f"Output filename for distribution table"
+    help="Output filename for distribution table"
 )
 @click.option(
     "--output-dir",
     type=click.Path(file_okay=False, dir_okay=True, writable=True),
-    help=f"Output directory for results"
+    help="Output directory for results"
 )
 def main(star_file: str, group_column: str, output: str, output_dir: Path):
     try:

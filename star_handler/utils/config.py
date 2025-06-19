@@ -10,7 +10,6 @@ Provides simple configuration classes for:
 - Reference-based filtering
 """
 
-from pathlib import Path
 from dataclasses import dataclass
 
 @dataclass

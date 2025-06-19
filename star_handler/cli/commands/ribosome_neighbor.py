@@ -38,14 +38,14 @@ HELP, EPILOG = parse_docstring(RibosomeNeighborAnalyzer.__doc__)
     type=float,
     default=RibosomeNeighborConfig().search_radius,
     show_default=True,
-    help=f"Maximum neighbor search radius in Angstroms"
+    help="Maximum neighbor search radius in Angstroms"
 )
 @click.option(
     "-b", "--bin-size",
     type=float,
     default=RibosomeNeighborConfig().bin_size,
     show_default=True,
-    help=f"Size of distance histogram bins in Angstroms"
+    help="Size of distance histogram bins in Angstroms"
 )
 def main(star_file: str, entry_star: str, exit_star: str, search_radius: float, bin_size: float):
     try:
