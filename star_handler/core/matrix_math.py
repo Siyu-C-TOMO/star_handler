@@ -266,6 +266,40 @@ def distance_weighted(distances: np.ndarray,
     except Exception as e:
         raise RadialAnalysisError(f"Distance weighting failed: {str(e)}")
 
+def find_nearest_neighbor_distances(coords_query: np.ndarray, coords_target: np.ndarray) -> np.ndarray:
+    """
+    For each coordinate in coords_query, find the distance to the nearest neighbor in coords_target.
+
+    [WORKFLOW]
+    1. Build a KD-Tree from the target coordinates for efficient searching.
+    2. Query the tree with the query coordinates to find the distance to the single nearest neighbor (k=1).
+
+    [PARAMETERS]
+    coords_query : np.ndarray
+        The coordinates to query (shape: N x D, where D is dimension).
+    coords_target : np.ndarray
+        The coordinates to search within (shape: M x D).
+
+    [OUTPUT]
+    np.ndarray
+        An array of distances of shape (N,), where each element is the distance
+        to the nearest neighbor in coords_target.
+        
+    [RAISES]
+    MathError
+        If KD-Tree construction or query fails.
+    """
+    try:
+        if coords_target.shape[0] == 0:
+            return np.full(coords_query.shape[0], np.inf)
+        
+        tree_target = KDTree(coords_target)
+        distances, _ = tree_target.query(coords_query, k=1)
+        return distances
+    except Exception as e:
+        raise MathError(f"Nearest neighbor distance calculation failed: {str(e)}")
+
+
 def dfs(particle: int,
         visited: set,
         adjacency_matrix: np.ndarray,
