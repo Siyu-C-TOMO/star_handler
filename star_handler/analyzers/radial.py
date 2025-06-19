@@ -70,9 +70,7 @@ class RadialAnalyzer(BaseAnalyzer):
     def __init__(self,
                  star_file: str,
                  output_dir: Union[str, Path] = 'analysis',
-                 bin_size: float = None,
-                 min_distance: float = None,
-                 max_distance: float = None) -> None:
+                 **kwargs) -> None:
         """Initialize RadialAnalyzer.
         
         [PARAMETERS]
@@ -80,23 +78,13 @@ class RadialAnalyzer(BaseAnalyzer):
             Path to input STAR file
         output_dir : Union[str, Path]
             Base output directory, defaults to 'analysis'
-        bin_size : Optional[float]
-            Size of distance bins in Angstroms
-        min_distance : Optional[float]
-            Minimum distance to consider
-        max_distance : Optional[float]
-            Maximum distance to consider
+        **kwargs : Any
+            Additional configuration parameters (e.g., bin_size, min_distance, max_distance)
             
         [EXAMPLE]
         >>> analyzer = RadialAnalyzer("particles.star", bin_size=50)
         """
-        super().__init__(
-            star_file,
-            output_dir=output_dir,
-            bin_size=bin_size,
-            min_distance=min_distance,
-            max_distance=max_distance
-        )
+        super().__init__(star_file, output_dir=output_dir, **kwargs)
         
     def _create_bins(self) -> Tuple[np.ndarray, np.ndarray]:
         """Create distance bins based on configuration.

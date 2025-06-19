@@ -15,6 +15,7 @@ from datetime import datetime
 from functools import wraps
 from typing import Optional, Callable
 from slack_bolt import App
+import getpass
 
 class SlackNotifier:
     """Handles Slack notifications using Bolt framework."""
@@ -146,6 +147,8 @@ def log_execution(func: Optional[Callable] = None,
     def decorator(func: Callable) -> Callable:
         logger_name = f"{func.__module__}.{func.__name__}"
         logger = logging.getLogger(logger_name)
+        user = getpass.getuser()
+        directory = os.getcwd()
         
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -160,7 +163,7 @@ def log_execution(func: Optional[Callable] = None,
                 
                 if notify:
                     LogConfig.get_slack_notifier().send(
-                        f"✅ {logger_name} completed in {duration.total_seconds():.2f}s",
+                        f"✅ {logger_name} completed in {duration.total_seconds():.2f}s\nUser: {user}\nDirectory: {directory}",
                         channel=channel
                     )
                     
@@ -170,7 +173,7 @@ def log_execution(func: Optional[Callable] = None,
                 logger.error(f"Failed: {str(e)}")
                 if notify:
                     LogConfig.get_slack_notifier().send(
-                        f"❌ {logger_name} failed: {str(e)}",
+                        f"❌ {logger_name} failed: {str(e)}\nUser: {user}\nDirectory: {directory}",
                         channel=channel
                     )
                     

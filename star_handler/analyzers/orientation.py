@@ -72,7 +72,7 @@ class OrientationAnalyzer(BaseAnalyzer):
     def __init__(self, star_file: str, **kwargs) -> None:
         """Initialize OrientationAnalyzer.
         
-        Args:
+        [PARAMETERS]
             star_file: Path to input STAR file
             **kwargs: Optional configuration parameters
                      - output_dir: Output directory (default: 'analysis')
