@@ -33,13 +33,13 @@ class TemplateMatch3DProcessor(BaseProcessor):
 
     [EXAMPLE]
     # In matching directory:
-    $ star-handler process-template-match-3D
+    $ star-handler process-3DTM2relion
 
     # Or specify directory:
-    $ star-handler process-template-match-3D -d /path/to/matching
+    $ star-handler process-3DTM2relion -d /path/to/matching
     """
     
-    SCALE_FACTORS = (512, 720, 376)
+    SCALE_FACTORS = (512, 512, 376)
     
     def __init__(self, working_dir: Optional[str] = None):
         """Initialize processor with optional working directory.

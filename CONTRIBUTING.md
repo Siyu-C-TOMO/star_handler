@@ -61,7 +61,10 @@ Use the custom exception classes defined in `analyzers/base.py` (e.g., `Analysis
 
 ## Adding a New Command
 
-To streamline development and ensure consistency, use the provided scaffolding script to generate the boilerplate for a new command.
+To streamline development and ensure consistency, use the provided scaffolding script to generate the boilerplate for a new command. The script supports three types of commands:
+- **`processor`**: For modifying, filtering, or transforming STAR files.
+- **`analyzer`**: For performing analysis on a single STAR file.
+- **`comparer`**: For comparing two STAR files.
 
 ### Usage
 
@@ -72,26 +75,29 @@ To streamline development and ensure consistency, use the provided scaffolding s
 
 2.  Run the `create_new_command.py` script with the desired `name` and `type`:
     ```bash
-    # For a command that compares two STAR files
-    python create_new_command.py my_comparison_feature comparer
+    # For a command that processes a STAR file
+    python create_new_command.py my_processing_feature processor
 
     # For a command that analyzes a single STAR file
     python create_new_command.py my_analysis_feature analyzer
+
+    # For a command that compares two STAR files
+    python create_new_command.py my_comparison_feature comparer
     ```
 
 ### What It Does
 
 The script will automatically create two files based on a consistent naming convention:
 
--   **Analyzer/Comparer File**: `star_handler/analyzers/my_comparison_feature.py`
-    - Contains a template class (`MyComparisonFeatureComparer`) that inherits from the correct base class.
+-   **Module File**: `star_handler/modules/<type>/my_feature.py`
+    - Contains a template class (e.g., `MyFeatureProcessor`) that inherits from the correct base class (`BaseProcessor`, `BaseAnalyzer`, or `BaseComparer`).
     - Includes a pre-formatted docstring and placeholder methods.
 
--   **Command File**: `star_handler/cli/commands/my_comparison_feature.py`
-    - Contains a pre-configured `click` command (`star-my-comparison-feature`).
-    - Automatically linked to the new analyzer/comparer class.
+-   **Command File**: `star_handler/cli/commands/my_feature.py`
+    - Contains a pre-configured `click` command (`star-my-feature`).
+    - Automatically linked to the new module class.
 
-Your task is then reduced to filling in the core logic in the generated `.../analyzers/` file and adding any specific command-line options to the `.../cli/commands/` file.
+Your task is then reduced to filling in the core logic in the generated `.../modules/<type>/` file and adding any specific command-line options to the `.../cli/commands/` file.
 
 ### Command Discovery
 

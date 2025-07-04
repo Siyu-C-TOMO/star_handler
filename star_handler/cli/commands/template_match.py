@@ -21,9 +21,9 @@ HELP, EPILOG = parse_docstring(TemplateMatch3DProcessor.__doc__)
     show_default=True,
     help="Working directory containing star files"
 )
-def main(directory: str):
+def main(dir: str):
     try:
-        processor = TemplateMatch3DProcessor(directory)
+        processor = TemplateMatch3DProcessor(dir)
         processor.process()
         
     except Exception as e:

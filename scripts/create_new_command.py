@@ -56,6 +56,46 @@ class {class_name}(BaseAnalyzer):
         pass
 """
 
+PROCESSOR_TEMPLATE = """
+from .base import BaseProcessor
+from ...utils.errors import ProcessingError
+
+class {class_name}(BaseProcessor):
+    \"\"\"
+    A brief, one-line summary of the component.
+
+    A more detailed description of the component's purpose and functionality.
+
+    [Workflow]
+    1. Step one of the process.
+    2. Step two of the process.
+    3. ...
+
+    [Parameters]
+    param_one : str
+        Description of the first parameter.
+    
+    [OUTPUT]
+    None
+        This processor modifies files in place or creates new ones.
+
+    [RAISES]
+    ProcessingError
+        If the processing fails.
+
+    [EXAMPLE]
+    >>> processor = {class_name}()
+    >>> processor.process()
+    \"\"\"
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Your initialization logic here
+
+    def process(self):
+        # Your core processing logic here
+        pass
+"""
+
 COMPARER_TEMPLATE = """
 from .base import BaseComparer, AnalysisError
 
@@ -99,7 +139,7 @@ COMMAND_TEMPLATE = """
 import sys
 import click
 
-from star_handler.analyzers.{module_name} import {class_name}
+from star_handler.modules.{module_type}.{module_name} import {class_name}
 from star_handler.utils.logger import setup_logger
 from star_handler.utils.doc_parser import parse_docstring
 
@@ -122,19 +162,28 @@ HELP, EPILOG = parse_docstring({class_name}.__doc__)
 )
 def main(**kwargs):
     \"\"\"
-    Command-line interface for running the {command_name} analysis.
+    Command-line interface for running the {command_name} command.
     \"\"\"
     try:
-        logger.info("Starting {command_name} analysis...")
+        logger.info("Starting {command_name}...")
         # Pass kwargs to the class constructor
         instance = {class_name}(**kwargs)
-        instance.compare() # Or instance.process() for analyzers
         
-        logger.info("Analysis complete.")
+        # Dynamically call the main method of the class
+        if hasattr(instance, 'run'):
+            instance.run()
+        elif hasattr(instance, 'process'):
+            instance.process()
+        elif hasattr(instance, 'compare'):
+            instance.compare()
+        else:
+            raise NotImplementedError(f"The class {class_name} does not have a standard run method.")
+
+        logger.info("Command complete.")
         print(f"{class_name} complete. Results saved in '{kwargs.get('output_dir')}'")
         
     except Exception as e:
-        logger.error(f"An error occurred during analysis: {e}", exc_info=True)
+        logger.error(f"An error occurred: {e}", exc_info=True)
         sys.exit(1)
 
 if __name__ == '__main__':
@@ -155,13 +204,13 @@ def main():
     )
     parser.add_argument(
         "type",
-        choices=['analyzer', 'comparer'],
+        choices=['analyzer', 'comparer', 'processor'],
         help="Type of the command."
     )
     args = parser.parse_args()
 
     base_path = Path(__file__).parent.parent
-    analyzers_path = base_path / "star_handler" / "analyzers"
+    modules_path = base_path / "star_handler" / "modules"
     commands_path = base_path / "star_handler" / "cli" / "commands"
 
     base_name = args.name.replace('-', '_')
@@ -172,28 +221,44 @@ def main():
     if args.type == 'analyzer':
         class_name = f"{camel_name}Analyzer"
         template = ANALYZER_TEMPLATE
-        default_output = base_name
-    else: 
+        module_path = modules_path / "analyzers"
+        module_type = "analyzers"
+    elif args.type == 'comparer':
         class_name = f"{camel_name}Comparer"
         template = COMPARER_TEMPLATE
-        default_output = base_name
+        module_path = modules_path / "comparers"
+        module_type = "comparers"
+    else:  # processor
+        class_name = f"{camel_name}Processor"
+        template = PROCESSOR_TEMPLATE
+        module_path = modules_path / "processors"
+        module_type = "processors"
 
-    analyzer_content = template.format(
+    default_output = base_name
+
+    # Ensure the target directory exists
+    module_path.mkdir(parents=True, exist_ok=True)
+
+    module_content = template.format(
         class_name=class_name,
-        analyzer_name=base_name,
+        analyzer_name=base_name, # Keep for compatibility with analyzer template
         default_output_dir=default_output
     )
-    analyzer_file = analyzers_path / f"{module_name}.py"
-    if analyzer_file.exists():
-        print(f"Error: File already exists at {analyzer_file}")
+    module_file = module_path / f"{module_name}.py"
+    if module_file.exists():
+        print(f"Error: File already exists at {module_file}")
     else:
-        analyzer_file.write_text(analyzer_content)
-        print(f"Successfully created analyzer: {analyzer_file}")
+        module_file.write_text(module_content)
+        print(f"Successfully created module: {module_file}")
+
+    # Ensure the target directory exists
+    commands_path.mkdir(parents=True, exist_ok=True)
 
     command_content = COMMAND_TEMPLATE.format(
         command_name=command_name,
         module_name=module_name,
         class_name=class_name,
+        module_type=module_type,
         default_output_dir=default_output
     )
     command_file = commands_path / f"{module_name}.py"
