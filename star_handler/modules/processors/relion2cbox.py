@@ -59,6 +59,8 @@ class Relion2CboxProcessor(BaseProcessor):
         self.bin_factor = bin_factor
 
         self.output_dir = Path('cryolo/3DTM_pre')
+        self.all_tomos_link_dir = Path('cryolo/tomograms')
+        self.isonet_dir = Path('isonet/corrected_tomos')
         
         self.coord_dir = self.output_dir / 'COORD_ori'
         self.coord_expanded_dir = self.output_dir / 'COORD_expanded'
@@ -114,7 +116,9 @@ class Relion2CboxProcessor(BaseProcessor):
         """
         self.ensure_dir(self.output_dir, self.coord_dir, self.coord_expanded_dir, 
                         self.cbox_dir, self.cbox_expanded_dir)
-        
+
+        self._link_all_tomos()
+
         classify_star(self.star_file)
         source_sub_folder = Path('sub_folder')
         if source_sub_folder.exists() and source_sub_folder.is_dir():
@@ -140,7 +144,27 @@ class Relion2CboxProcessor(BaseProcessor):
         self.logger.info(f"Successfully processed {cbox_success_count} out of {len(sub_star_files)} files.")
         
         self._link_cbox_mrc(successful_stems)
-                
+
+    def _link_all_tomos(self):
+        """
+        Create symbolic links for ALL corrected tomograms from the isonet 
+        directory into the central `cryolo/tomograms` directory.
+        """
+        self.ensure_dir(self.all_tomos_link_dir)
+        self.logger.info(f"Linking all tomograms from {self.isonet_dir} to {self.all_tomos_link_dir}...")
+        
+        for tomo_source_path in self.isonet_dir.glob("*_corrected.mrc"):
+            link_target_path = self.all_tomos_link_dir / f"{tomo_source_path.stem.replace('_corrected', '')}.mrc"
+
+            if link_target_path.exists():
+                continue
+
+            try:
+                relative_source = os.path.relpath(tomo_source_path, self.all_tomos_link_dir)
+                os.symlink(relative_source, link_target_path)
+            except Exception as e:
+                self.logger.error(f"Failed to link {tomo_source_path.name}: {e}")
+                        
     def _scale_shift(self, star_data: dict) -> Tuple[np.ndarray, int]:
         """Extract and process coordinates from star data.
         
@@ -276,10 +300,17 @@ class Relion2CboxProcessor(BaseProcessor):
             }
 
     def _link_cbox_mrc(self, successful_stems: list):
-        """Create symbolic links for the two largest cbox files for verification."""
+        """
+        Create verification links for the two largest tomograms and their 
+        corresponding CBOX files inside the `3DTM_pre` output directory.
+        """
         if len(successful_stems) < 2:
             self.logger.info("Not enough successful files to create verification links.")
             return
+
+        train_tomo_dir = self.output_dir / 'tomograms'
+        train_cbox_dir = self.output_dir / 'CBOX'
+        self.ensure_dir(train_tomo_dir, train_cbox_dir)
 
         try:
             sorted_stems = sorted(
@@ -289,24 +320,22 @@ class Relion2CboxProcessor(BaseProcessor):
             )
             selected_files = sorted_stems[:2]
             
-            link_tomogram_dir = self.output_dir / 'tomograms'
-            link_cbox_dir = self.output_dir / 'CBOX'
-            self.ensure_dir(link_tomogram_dir, link_cbox_dir)
-            
             for stem in selected_files:
-                source_mrc = Path(f"../../../isonet/corrected_tomos/{stem}_corrected.mrc")
-                target_mrc_link = link_tomogram_dir / f"{stem}.mrc"
-                
-                if not target_mrc_link.exists():
-                    os.symlink(source_mrc, target_mrc_link)
-                
-                relative_cbox_path = Path(f"../{self.cbox_expanded_dir.name}/{stem}.cbox")
-                target_cbox_link = link_cbox_dir / f"{stem}.cbox"
+                source_tomo_link = self.all_tomos_link_dir / f"{stem}.mrc"
+                target_tomo_link = train_tomo_dir / f"{stem}.mrc"
+
+                if not target_tomo_link.exists():
+                    relative_tomo_source = os.path.relpath(source_tomo_link, train_tomo_dir)
+                    os.symlink(relative_tomo_source, target_tomo_link)
+
+                source_cbox_file = self.cbox_expanded_dir / f"{stem}.cbox"
+                target_cbox_link = train_cbox_dir / f"{stem}.cbox"
 
                 if not target_cbox_link.exists():
-                    os.symlink(relative_cbox_path, target_cbox_link)
+                    relative_cbox_source = os.path.relpath(source_cbox_file, train_cbox_dir)
+                    os.symlink(relative_cbox_source, target_cbox_link)
 
-            self.logger.info(f"Created verification links for the two largest files: {', '.join(selected_files)}")
+            self.logger.info(f"Created verification links for: {', '.join(selected_files)}")
 
         except FileNotFoundError as e:
             self.logger.error(f"Error creating links: Could not find a required file. {e}")
