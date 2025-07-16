@@ -2,6 +2,7 @@ from pathlib import Path
 
 import subprocess
 import random
+import shutil
 from typing import Optional, Tuple
 import numpy as np
 import os
@@ -56,10 +57,14 @@ class Relion2CboxProcessor(BaseProcessor):
         self.validate_files(star_file)
         self.star_file = star_file
         self.bin_factor = bin_factor
-        self.coord_dir = self.get_output_path('COORD', '_ori', 'COORD')
-        self.coord_expanded_dir = self.get_output_path('COORD', '_expanded', 'COORD')
-        self.cbox_dir = self.get_output_path('cbox', '_ori', 'cbox')
-        self.cbox_expanded_dir = self.get_output_path('cbox', '_expanded', 'cbox')
+
+        self.output_dir = Path('cryolo/3DTM_pre')
+        
+        self.coord_dir = self.output_dir / 'COORD_ori'
+        self.coord_expanded_dir = self.output_dir / 'COORD_expanded'
+        self.cbox_dir = self.output_dir / 'cbox_ori'
+        self.cbox_expanded_dir = self.output_dir / 'cbox_expanded'
+        self.sub_star_dir = self.output_dir / 'sub_folder'
     
     def _expand_z_coord(self, coord: np.ndarray) -> np.ndarray:
         """Expand Z coordinates to nearest multiples of 10.
@@ -107,12 +112,17 @@ class Relion2CboxProcessor(BaseProcessor):
         ProcessingError
             If any processing step fails
         """
-        self.ensure_dir(self.coord_dir, self.coord_expanded_dir, 
+        self.ensure_dir(self.output_dir, self.coord_dir, self.coord_expanded_dir, 
                         self.cbox_dir, self.cbox_expanded_dir)
         
         classify_star(self.star_file)
+        source_sub_folder = Path('sub_folder')
+        if source_sub_folder.exists() and source_sub_folder.is_dir():
+            if self.sub_star_dir.exists():
+                shutil.rmtree(self.sub_star_dir)
+            shutil.move(str(source_sub_folder), str(self.sub_star_dir))
         
-        sub_star_files = list(Path('sub_folder').glob("*.star"))
+        sub_star_files = list(self.sub_star_dir.glob("*.star"))
         self.logger.info(f"Found {len(sub_star_files)} tomograms to process.")
 
         parallel_results = parallel_process_tomograms(
@@ -266,7 +276,7 @@ class Relion2CboxProcessor(BaseProcessor):
             }
 
     def _link_cbox_mrc(self, successful_stems: list):
-        """Create symbolic links for the largest cbox files for verification."""
+        """Create symbolic links for the two largest cbox files for verification."""
         if len(successful_stems) < 2:
             self.logger.info("Not enough successful files to create verification links.")
             return
@@ -277,25 +287,25 @@ class Relion2CboxProcessor(BaseProcessor):
                 key=lambda s: (self.cbox_expanded_dir / f"{s}.cbox").stat().st_size,
                 reverse=True
             )
-            
             selected_files = sorted_stems[:2]
             
-            self.ensure_dir('tomograms', 'CBOX')
+            link_tomogram_dir = self.output_dir / 'tomograms'
+            link_cbox_dir = self.output_dir / 'CBOX'
+            self.ensure_dir(link_tomogram_dir, link_cbox_dir)
             
             for stem in selected_files:
-                tomogram_link = Path('tomograms') / f"{stem}.mrc"
-                if not tomogram_link.exists():
-                    os.symlink(
-                        f"../../isonet/tomograms/{stem}.mrc",
-                        tomogram_link
-                    )
+                source_mrc = Path(f"../../../isonet/corrected_tomos/{stem}_corrected.mrc")
+                target_mrc_link = link_tomogram_dir / f"{stem}.mrc"
                 
-                cbox_link = Path('CBOX') / f"{stem}.cbox"
-                if not cbox_link.exists():
-                    os.symlink(
-                        f"../{self.cbox_expanded_dir}/{stem}.cbox",
-                        cbox_link
-                    )
+                if not target_mrc_link.exists():
+                    os.symlink(source_mrc, target_mrc_link)
+                
+                relative_cbox_path = Path(f"../{self.cbox_expanded_dir.name}/{stem}.cbox")
+                target_cbox_link = link_cbox_dir / f"{stem}.cbox"
+
+                if not target_cbox_link.exists():
+                    os.symlink(relative_cbox_path, target_cbox_link)
+
             self.logger.info(f"Created verification links for the two largest files: {', '.join(selected_files)}")
 
         except FileNotFoundError as e:

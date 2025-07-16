@@ -77,7 +77,7 @@ class BaseProcessor:
             Variable number of directory paths to create
         """
         for dir_path in dirs:
-            Path(dir_path).mkdir(exist_ok=True)
+            Path(dir_path).mkdir(parents=True, exist_ok=True)
             
     def get_output_path(self, 
                        input_path: Union[str, Path],
