@@ -113,47 +113,25 @@ class Relion2CboxProcessor(BaseProcessor):
         classify_star(self.star_file)
         
         sub_star_files = list(Path('sub_folder').glob("*.star"))
-        results = parallel_process_tomograms(
+        self.logger.info(f"Found {len(sub_star_files)} tomograms to process.")
+
+        parallel_results = parallel_process_tomograms(
             sub_star_files,
-            self._process_sub_star
+            self._sub_star_to_COORD
         )
 
-        error_count = 0
-        success_count = 0
-        for filename, error in results:
-            if error:
-                self.logger.error(f"Failed to process {filename}: {error}")
-                error_count += 1
-            else:
-                self.logger.info(f"Processed {filename}")
-                success_count += 1
-        self.logger.info(f"Processed {success_count} files with {error_count} errors.")
-        if error_count > 0:
-            self.logger.warning("Some files failed to process. Check logs for details.")
+        self.logger.info("Converting to cbox...")
+        cbox_success_count = 0
+        successful_stems = []
+        for result in parallel_results:
+            if self._COORD_to_cbox(result):
+                cbox_success_count += 1
+                successful_stems.append(result['stem'])
+        self.logger.info(f"Successfully processed {cbox_success_count} out of {len(sub_star_files)} files.")
+        
+        self._link_cbox_mrc(successful_stems)
                 
-        successful_files = [f for f, err in results if not err]
-        if len(successful_files) >= 2:
-            selected_files = random.sample(successful_files, 2)
-            
-            self.ensure_dir('tomograms', 'CBOX')
-            
-            for stem in selected_files:
-                tomogram_link = Path('tomograms') / f"{stem}.mrc"
-                if not tomogram_link.exists():
-                    os.symlink(
-                        f"../../isonet/tomograms/{stem}.mrc",
-                        tomogram_link
-                    )
-                
-                cbox_link = Path('CBOX') / f"{stem}.cbox"
-                if not cbox_link.exists():
-                    os.symlink(
-                        f"../{self.cbox_expanded_dir}/{stem}.cbox",
-                        cbox_link
-                    )
-            self.logger.info(f"Created symbolic links for: {', '.join(selected_files)}")
-                
-    def _extract_coordinates(self, star_data: dict) -> Tuple[np.ndarray, int]:
+    def _scale_shift(self, star_data: dict) -> Tuple[np.ndarray, int]:
         """Extract and process coordinates from star data.
         
         [PARAMETERS]
@@ -165,7 +143,7 @@ class Relion2CboxProcessor(BaseProcessor):
             - Processed coordinates array
             - Box size from optics
         """
-        box = star_data['optics']['rlnImageSize'][0]
+        box_size = star_data['optics']['rlnImageSize'][0]
         
         if self.bin_factor != 1:
             star_data['particles'] = scale_coord(
@@ -177,9 +155,9 @@ class Relion2CboxProcessor(BaseProcessor):
         
         shift_result = apply_shift(star_data)
         coord = np.array(shift_result[0]).astype(int)
-        return coord, box
+        return coord, box_size
         
-    def _save_coordinates(self, coord: np.ndarray, 
+    def _save_COORD(self, coord: np.ndarray, 
                          stem: str, 
                          is_expanded: bool = False) -> Path:
         """Save coordinates to file.
@@ -201,17 +179,33 @@ class Relion2CboxProcessor(BaseProcessor):
         np.savetxt(coord_path, coord, delimiter='\t', fmt='%s')
         return coord_path
         
-    def _convert_to_cbox(self, coord_path: Path, box_size: int, is_expanded: bool = False):
-        """Convert coordinates to cbox format.
-        
-        [PARAMETERS]
-        coord_path : Path
-            Path to coordinate file
-        box_size : int
-            Box size for cryolo
-        is_expanded : bool
-            Whether to use expanded output directory
+    def _COORD_to_cbox(self, result: dict) -> bool:
         """
+        Manages the conversion process of a tomogram's coord files to cbox format.
+        This includes checking for upstream errors from coordinate generation.
+
+        [PARAMETERS]
+        result : dict
+            A dictionary from the parallel processing step containing file info.
+
+        [OUTPUT]
+        bool
+            True if both conversions were successful, False otherwise.
+        """
+        if result.get('error'):
+            self.logger.error(f"Failed to generate coordinates for {result['stem']}: {result['error']}")
+            return False
+            
+        try:
+            self._call_cryolo(result['coord_path'], result['box_size'])
+            self._call_cryolo(result['expanded_coord_path'], result['box_size'], is_expanded=True)
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to convert {result['stem']} to cbox: {e}")
+            return False
+
+    def _call_cryolo(self, coord_path: Path, box_size: int, is_expanded: bool = False):
+        """Call cryolo_boxmanager_tools.py to convert a single coord file to cbox format."""
         output_dir = self.cbox_expanded_dir if is_expanded else self.cbox_dir
         subprocess.run(
             [
@@ -224,33 +218,87 @@ class Relion2CboxProcessor(BaseProcessor):
             check=True
         )
 
-    def _process_sub_star(self, sub_star_file: Path) -> Tuple[str, Optional[str]]:
-        """Process single sub star file to generate coord and cbox.
+    def _sub_star_to_COORD(self, sub_star_file: Path) -> dict:
+        """Generate coord files from a single sub star file.
         
         [PARAMETERS]
         sub_star_file : Path
             Path to sub STAR file
             
         [OUTPUT]
-        Tuple[str, Optional[str]]:
-            (filename, error_message if any)
+        dict:
+            A dictionary containing processing results:
+            - 'stem': str
+            - 'box_size': int
+            - 'coord_path': Path
+            - 'expanded_coord_path': Path
+            - 'error': Optional[str]
         """
+        stem = sub_star_file.stem
         try:
             star = format_input_star(sub_star_file)
-            coord, box = self._extract_coordinates(star)
+            coord, box_size = self._scale_shift(star)
             
-            coord_path = self._save_coordinates(coord, sub_star_file.stem)
-            self._convert_to_cbox(coord_path, box)
+            coord_path = self._save_COORD(coord, stem)
             
             expanded_coord = self._expand_z_coord(coord)
-            expanded_coord_path = self._save_coordinates(
+            expanded_coord_path = self._save_COORD(
                 expanded_coord, 
-                sub_star_file.stem, 
+                stem, 
                 is_expanded=True
             )
-            self._convert_to_cbox(expanded_coord_path, box, is_expanded=True)
             
-            return sub_star_file.stem, None
+            return {
+                'stem': stem,
+                'box_size': box_size,
+                'coord_path': coord_path,
+                'expanded_coord_path': expanded_coord_path,
+                'error': None
+            }
             
         except Exception as e:
-            return sub_star_file.stem, str(e)
+            return {
+                'stem': stem,
+                'box_size': -1,
+                'coord_path': None,
+                'expanded_coord_path': None,
+                'error': str(e)
+            }
+
+    def _link_cbox_mrc(self, successful_stems: list):
+        """Create symbolic links for the largest cbox files for verification."""
+        if len(successful_stems) < 2:
+            self.logger.info("Not enough successful files to create verification links.")
+            return
+
+        try:
+            sorted_stems = sorted(
+                successful_stems,
+                key=lambda s: (self.cbox_expanded_dir / f"{s}.cbox").stat().st_size,
+                reverse=True
+            )
+            
+            selected_files = sorted_stems[:2]
+            
+            self.ensure_dir('tomograms', 'CBOX')
+            
+            for stem in selected_files:
+                tomogram_link = Path('tomograms') / f"{stem}.mrc"
+                if not tomogram_link.exists():
+                    os.symlink(
+                        f"../../isonet/tomograms/{stem}.mrc",
+                        tomogram_link
+                    )
+                
+                cbox_link = Path('CBOX') / f"{stem}.cbox"
+                if not cbox_link.exists():
+                    os.symlink(
+                        f"../{self.cbox_expanded_dir}/{stem}.cbox",
+                        cbox_link
+                    )
+            self.logger.info(f"Created verification links for the two largest files: {', '.join(selected_files)}")
+
+        except FileNotFoundError as e:
+            self.logger.error(f"Error creating links: Could not find a required file. {e}")
+        except Exception as e:
+            self.logger.error(f"An unexpected error occurred while creating links: {e}")
