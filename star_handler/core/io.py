@@ -40,39 +40,36 @@ def format_input_star(file_name: Union[str, Path]) -> Dict[str, pd.DataFrame]:
     except Exception as e:
         raise FormatError(f"Failed to read STAR file: {str(e)}")
 
-def format_output_star(star_file: Dict[str, pd.DataFrame], 
-                      file_name: Union[str, Path]) -> None:
+def format_output_star(star_file: Dict[str, pd.DataFrame],
+                       file_name: Union[str, Path]) -> None:
     """Write formatted data to a STAR file.
-    
+
+    This function writes all data blocks from the input dictionary to the
+    output STAR file, ensuring compatibility with various STAR file formats,
+    including multi-block files from RELION 5.
+
     [WORKFLOW]
-    1. Check format (3.0 vs 3.1 based on presence of optics)
-    2. Write appropriate format STAR file
-    
+    1. Validate that the input is a non-empty dictionary.
+    2. Write all key-value pairs from the dictionary to the STAR file.
+
     [PARAMETERS]
     star_file : Dict[str, pd.DataFrame]
-        Dictionary containing particle data and optionally optics
+        Dictionary containing data blocks to be written.
     file_name : Union[str, Path]
-        Output file path
-        
+        Output file path.
+
     [RAISES]
     StarFileError
-        If writing fails or input data is invalid
-        
+        If writing fails or the input dictionary is empty.
+
     [EXAMPLE]
-    >>> format_output_star({'particles': particles_df}, 'output.star')
+    >>> data = {'particles': particles_df, 'optics': optics_df}
+    >>> format_output_star(data, 'output.star')
     """
     try:
-        if 'particles' not in star_file:
-            raise FormatError("Missing 'particles' data")
-            
-        if 'optics' in star_file:
-            output_data = {
-                'optics': star_file['optics'],
-                'particles': star_file['particles']
-            }
-        else:
-            output_data = {'particles': star_file['particles']}
-            
-        starfile.write(output_data, file_name)
+        if not star_file:
+            raise FormatError("Input dictionary is empty. Nothing to write.")
+
+        starfile.write(star_file, file_name, overwrite=True)
     except Exception as e:
         raise StarFileError(f"Failed to write STAR file: {str(e)}")

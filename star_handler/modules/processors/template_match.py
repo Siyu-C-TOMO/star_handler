@@ -23,7 +23,7 @@ class TemplateMatch3DProcessor(BaseProcessor):
         Working directory containing star files (default: current directory)
 
     [OUTPUT]
-    When no ribo_list.txt:
+    When no ribo_list_final.txt:
     - ../../ribo_list_blank.txt: One column file with star prefixes
     - scaled/*.star: Scaled coordinates for Napari visualization
 

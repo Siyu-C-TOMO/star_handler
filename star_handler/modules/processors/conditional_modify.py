@@ -34,7 +34,7 @@ class ConditionalModifyProcessor(BaseProcessor):
 
     [EXAMPLE]
     Add prefix to micrograph names for optics group 1:
-        $ star-handler star-modify-conditional -f particles.star -c 1 -s "micrographs/"
+        $ star-handler process-modify-by-match -f particles.star -c 1 -s "micrographs/"
     """
     
     def __init__(self, 

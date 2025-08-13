@@ -160,14 +160,14 @@ class ClassDistribution:
         - Distribution heatmap (PNG)
         - Class sizes plot (PNG)
         """
-        output_dir = Path(output_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = Path(output_dir) if output_dir else Path('.')
+        output_path.mkdir(parents=True, exist_ok=True)
         
-        table_file = output_dir / self.output_file
+        table_file = output_path / self.output_file
         distribution.to_csv(table_file, sep='\t', float_format="%d")
         self.logger.info(f"Saved distribution table to {table_file}")
         
-        report_file = output_dir / 'classification_report.txt'
+        report_file = output_path / 'classification_report.txt'
         with open(report_file, 'w') as f:
             f.write("=== RELION Classification Analysis ===\n\n")
             
@@ -210,7 +210,7 @@ class ClassDistribution:
         plt.yticks(range(len(distribution.index)), distribution.index)
         
         plt.tight_layout()
-        heatmap_file = output_dir / 'class_distribution_heatmap.png'
+        heatmap_file = output_path / 'class_distribution_heatmap.png'
         plt.savefig(heatmap_file, dpi=300, bbox_inches='tight')
         plt.close()
         
@@ -222,8 +222,8 @@ class ClassDistribution:
         plt.ylabel('Percentage of Particles')
         plt.xticks(rotation=45)
         plt.tight_layout()
-        barplot_file = output_dir / 'class_sizes.png'
+        barplot_file = output_path / 'class_sizes.png'
         plt.savefig(barplot_file, dpi=300, bbox_inches='tight')
         plt.close()
         
-        self.logger.info(f"Generated visualizations in {output_dir}")
+        self.logger.info(f"Generated visualizations in {output_path}")
