@@ -49,9 +49,9 @@ class TemplateMatch3DProcessor(BaseProcessor):
             Path to directory containing star files (default: current directory)
         """
         super().__init__(working_dir)
-        self.list_file = self.working_dir.parent.parent / "ribo_list_final.txt"
-        self.blank_list = self.working_dir.parent.parent / "ribo_list_blank.txt"
-        
+        self.list_file = self.working_dir.resolve().parent.parent / "ribo_list_final.txt"
+        self.blank_list = self.working_dir.resolve().parent.parent / "ribo_list_blank.txt"
+
         self.scaled_dir = self.working_dir / "scaled"
         self.filtered_dir = self.working_dir / "filtered"
         
