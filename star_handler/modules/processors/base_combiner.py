@@ -66,7 +66,7 @@ class BaseRelionCombiner(BaseProcessor):
             "--output_star", str(output_star_path),
             "--output_angpix", str(output_angpix),
             "--output_processing", str(self.output_dir.resolve()),
-            "--box", "128",
+            "--box", "144",
             "--diameter", "350",
             "--relative_output_paths",
             "--device_list", "2",
