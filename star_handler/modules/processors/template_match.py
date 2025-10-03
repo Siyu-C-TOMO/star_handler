@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional, Tuple
 
 from .base import BaseProcessor
@@ -161,7 +162,7 @@ class TemplateMatch3DProcessor(BaseProcessor):
             particles = threshold_star(
                 particles,
                 'rlnAutopickFigureOfMerit',
-                min_val=cc
+                min_val=0
             )
             particles = threshold_star(
                 particles,
@@ -169,8 +170,17 @@ class TemplateMatch3DProcessor(BaseProcessor):
                 min_val=low_z,
                 max_val=high_z
             )
+
+            # from pathlib import Path
+            # particles = particles.sort_values('rlnAutopickFigureOfMerit', ascending=False)
+            # ref_file_path = Path("/data/workspace/Siyu/Titan1_Processing/20250820_HSC_4hr/forWindows_frames/matching/filtered") / f"{prefix}.star"
+            # ref_data = format_input_star(ref_file_path)
+            # ref_particle_count = len(ref_data['particles'])
+            # self.logger.info(f"Reference file {prefix}.star has {ref_particle_count} particles")
+            # particles = particles.head(ref_particle_count)
+
             star_data['particles'] = particles
-            
+
             particles['rlnMicrographName'] = particles['rlnMicrographName'].str.replace(
                 '.mrc', '.tomostar'
             )

@@ -39,7 +39,7 @@ class MCombineProcessor(BaseProcessor):
         super().__init__()
         self.star_file = Path(star_file).resolve()
         self.base_output_dir = Path(output_dir).resolve()
-        self.work_dir = self.base_output_dir / "ribo_combine_after1and2"
+        self.work_dir = self.base_output_dir / "GroESL_m_combine"
         self.m_parameters = m_parameters if m_parameters else {}
         self.source_files_to_add = []
         self.modified_source_files = []
@@ -229,29 +229,30 @@ class MCombineProcessor(BaseProcessor):
                 ["MTools", "add_source", "--population", str(population_file), "--source", str(source_path)]
             )
 
-        mask_output = self.work_dir / "mask.mrc"
-        commands.append(
-            ["relion_mask_create", "--i", str(job_dir / "run_class001.mrc"), "--o", str(mask_output), "--ini_threshold", "0.025"]
-        )
+        # mask_output = self.work_dir / "mask.mrc"
+        # commands.append(
+        #     ["relion_mask_create", "--i", str(job_dir / "run_class001.mrc"), "--o", str(mask_output), "--ini_threshold", "2.5"]
+        # )
     
         commands.append(
             ["MTools", "create_species",
              "--population", str(population_file),
              "--name", species,
-             "--diameter", "350",
-             "--sym", "C1",
+             "--diameter", "340",
+             "--sym", "C7",
              "--temporal_samples", "1",
              "--half1", str(job_dir / "run_half1_class001_unfil.mrc"),
              "--half2", str(job_dir / "run_half2_class001_unfil.mrc"),
-             "--mask", str(mask_output),
+            #  "--mask", str(mask_output),
+            "--mask", "/data/Projects/Niklas/processing/Goslar_GroESL/relion/Goslar_GroESL_job13_refine_4Apx_cut_mask_for_m.mrc",
              "--particles_m", str(m_star_file),
-             "--angpix_resample", "1.87",
+             "--angpix_resample", "4",
              "--lowpass", "20"]
         )
 
         mcore_common_args = ["--population", str(population_file)]
         mcore_refine_args = ["--refine_imagewarp", "6x4", "--refine_particles", "--ctf_defocus"]
-        mcore_resource_args = ["--perdevice_refine", "4", "--perdevice_preprocess", "1", "--perdevice_postprocess", "1"]
+        mcore_resource_args = ["--devicelist", "2", "--perdevice_refine", "4", "--perdevice_preprocess", "1", "--perdevice_postprocess", "1"]
 
         commands.extend([
             ["MCore", *mcore_common_args, *mcore_resource_args, "--iter", "0"],
