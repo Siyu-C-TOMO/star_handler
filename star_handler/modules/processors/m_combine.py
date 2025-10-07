@@ -39,7 +39,7 @@ class MCombineProcessor(BaseProcessor):
         super().__init__()
         self.star_file = Path(star_file).resolve()
         self.base_output_dir = Path(output_dir).resolve()
-        self.work_dir = self.base_output_dir / "GroESL_m_combine"
+        self.work_dir = self.base_output_dir / "ribo_2set_60S"
         self.m_parameters = m_parameters if m_parameters else {}
         self.source_files_to_add = []
         self.modified_source_files = []
@@ -238,15 +238,15 @@ class MCombineProcessor(BaseProcessor):
             ["MTools", "create_species",
              "--population", str(population_file),
              "--name", species,
-             "--diameter", "340",
-             "--sym", "C7",
+             "--diameter", "350",
+             "--sym", "C1",
              "--temporal_samples", "1",
              "--half1", str(job_dir / "run_half1_class001_unfil.mrc"),
              "--half2", str(job_dir / "run_half2_class001_unfil.mrc"),
             #  "--mask", str(mask_output),
-            "--mask", "/data/Projects/Niklas/processing/Goslar_GroESL/relion/Goslar_GroESL_job13_refine_4Apx_cut_mask_for_m.mrc",
+            "--mask", "/data/workspace/Siyu/Titan1_Processing/ribo_relion/relion5_3p74A/MaskCreate/20250820_mr0_60S_0p025_3_6/mask.mrc",
              "--particles_m", str(m_star_file),
-             "--angpix_resample", "4",
+             "--angpix_resample", "1.87",
              "--lowpass", "20"]
         )
 
@@ -263,8 +263,8 @@ class MCombineProcessor(BaseProcessor):
             # ["MCore", *mcore_common_args, *mcore_refine_args, *mcore_resource_args, "--refine_mag", "--ctf_cs", "--ctf_zernike3"],
             ["EstimateWeights", "--population", str(population_file), "--source", name, "--resolve_items"],
             ["MCore", *mcore_common_args, *mcore_resource_args],
-            # ["EstimateWeights", "--population", str(population_file), "--source", name, "--resolve_frames"],
-            # ["MCore", *mcore_common_args, *mcore_resource_args, "--refine_particles"],
+            ["EstimateWeights", "--population", str(population_file), "--source", name, "--resolve_frames"],
+            ["MCore", *mcore_common_args, *mcore_resource_args, "--refine_particles"],
             # ["MTools", "resample_trajectories", "--population", str(population_file), "--species", str(self.work_dir / "species*" / f"{species}.species"), "--samples", "2"],
             # ["MCore", *mcore_common_args, *mcore_resource_args, "--refine_stageangles", "--refine_mag", "--ctf_cs", "--ctf_zernike3"]
         ])

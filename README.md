@@ -15,20 +15,16 @@ A comprehensive toolkit for analyzing and processing RELION STAR files, with a f
 - **Conditional Modification**: Modify columns in a STAR file based on specific conditions.
 - **Reference-based Filtering**: Filter a STAR file based on the particles present in a reference STAR file.
 - **Threshold-based Splitting**: Split a STAR file into multiple files based on value thresholds.
-- **Template Matching Processor**: Process 3D template matching results for visualization and filtering.
+- **Data Preparation**: Prepare STAR files for Relion 3 and Relion 5.
+- **M refinement**: Run M refinement from multiple datasets.
 - **Format Conversion**: Convert STAR files from Warp/MotionCor2 format to RELION format, and generate CryoLO cbox files from RELION coordinates.
 
 ## Installation
 
-### From PyPI (Recommended)
-```bash
-pip install star-handler
-```
-
 ### From Source
 ```bash
-git clone https://github.com/Siyu-Chen-Bio/star_handler.git
-cd star_handler/star_handler_v2
+git clone https://github.com/Siyu-C-TOMO/star_handler.git
+cd star_handler/
 pip install -r requirements.txt
 pip install -e .
 ```
@@ -88,31 +84,39 @@ def your_function():
     ```bash
     star-handler compare-ribo-polysome -f r.star -en entry.star -ex exit.star -r 600
     ```
-9.  **Process and convert 3D Template Matching results**:
+9.  **Prepare STAR file for Relion 3**:
     ```bash
-    star-handler process-3DTM2relion -d /path/to/matching_dir
+    star-handler process-relion3-prep -f your_file.star
     ```
-10. **Classify particles by tomogram**:
+10. **Prepare STAR file for Relion 5**:
+    ```bash
+    star-handler process-relion5-prep -f your_file.star
+    ```
+11. **Run M refinement from multiple datasets**:
+    ```bash
+    star-handler process-m-combine -p "pattern_*.star" -o combined.star
+    ```
+12. **Classify particles by tomogram**:
     ```bash
     star-handler process-classify-by-tomo -f particles.star
     ```
-11. **Filter a STAR file by matching another**:
+13. **Filter a STAR file by matching another**:
     ```bash
     star-handler process-filter-by-match -f full.star -r ref.star
     ```
-12. **Modify a STAR file based on a condition**:
+14. **Modify a STAR file based on a condition**:
     ```bash
     star-handler process-modify-by-match -f p.star -c 1 -s "mic/"
     ```
-13. **Convert RELION coordinates to cryoLO format**:
+15. **Convert RELION coordinates to cryoLO format**:
     ```bash
     star-handler process-relion2cryolo -f run_data.star -b 4
     ```
-14. **Split a STAR file by a value threshold**:
+16. **Split a STAR file by a value threshold**:
     ```bash
     star-handler process-split-by-thres -f p.star -t rlnAngleTilt -th 45.0
     ```
-15. **Convert a Warp STAR file to RELION format**:
+17. **Convert a Warp STAR file to RELION format**:
     ```bash
     star-handler process-warp2relion -f warp_particles.star
     ```
@@ -129,7 +133,7 @@ from star_handler.modules.comparers import (
 )
 from star_handler.modules.processors import (
     ConditionalModifyProcessor, FilterByRefProcessor, Relion2CboxProcessor,
-    TemplateMatch3DProcessor, Warp2RelionProcessor
+    Warp2RelionProcessor, Relion3PrepProcessor, Relion5PrepProcessor, MCombineProcessor
 )
 from star_handler.core.selection import classify_star, split_star_by_threshold
 
@@ -183,9 +187,17 @@ warp_converter.process()
 cbox_converter = Relion2CboxProcessor("relion.star", bin_factor=4)
 cbox_converter.process()
 
-# 3D Template Match
-template_processor = TemplateMatch3DProcessor("matching_dir")
-template_processor.process()
+# Relion 3 Prep
+relion3_prep = Relion3PrepProcessor("your_file.star")
+relion3_prep.process()
+
+# Relion 5 Prep
+relion5_prep = Relion5PrepProcessor("your_file.star")
+relion5_prep.process()
+
+# M Combine
+m_combiner = MCombineProcessor(pattern="pattern_*.star", output_file="combined.star")
+m_combiner.process()
 ```
 
 ## Requirements

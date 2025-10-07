@@ -75,7 +75,7 @@ class Relion5PrepProcessor(BaseRelionCombiner):
         ]
 
         for file_path in files_to_backup:
-            if file_path.exists() and not (backup_dir / file_path.name).exists():
+            if file_path.exists():
                 try:
                     shutil.copy(file_path, backup_dir)
                     self.logger.info(f"Backed up {file_path}")

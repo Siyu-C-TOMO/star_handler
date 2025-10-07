@@ -1,11 +1,11 @@
 import os
 import re
 from pathlib import Path
-from typing import Union, Dict, Tuple
+from typing import Union
 import pandas as pd
 
 from .base import BaseProcessor
-from ...core.io import format_input_star, format_output_star, run_command
+from ...core.io import run_command
 
 class BaseRelionCombiner(BaseProcessor):
     """
@@ -75,7 +75,7 @@ class BaseRelionCombiner(BaseProcessor):
         ]
         
         log_path = self.output_dir / "logs" / f"{self.prefix}_extraction.log"
-        run_command(cmd, log_path, cwd=self.project_dir, env=env, module_load="warp/2.0.0dev31")
+        run_command(cmd, log_path, cwd=self.project_dir, env=env, module_load="warp/2.0.0dev34")
         
         self.logger.info(f"Particle extraction completed for {self.prefix}.")
         return output_star_path
