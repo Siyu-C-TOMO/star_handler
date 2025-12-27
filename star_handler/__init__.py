@@ -20,6 +20,8 @@ from .modules.processors.filter_by_ref import FilterByRefProcessor
 from .modules.processors.relion2cbox import Relion2CboxProcessor
 from .modules.processors.template_match import TemplateMatch3DProcessor
 from .modules.processors.warp2relion import Warp2RelionProcessor
+from .modules.processors.add_helical import AddHelByRefProcessor
+
 
 
 __all__ = [
@@ -38,4 +40,5 @@ __all__ = [
     "Relion2CboxProcessor",
     "TemplateMatch3DProcessor",
     "Warp2RelionProcessor",
+    "AddHelByRefProcessor",
 ]

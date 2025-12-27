@@ -56,7 +56,9 @@ class BaseRelionCombiner(BaseProcessor):
         env = os.environ.copy()
         if force_float32:
             env['WARP_FORCE_MRC_FLOAT32'] = '1'
-            
+
+        box = int(72 * star_entry['rlnPixelSize'] / output_angpix)
+        self.logger.info(f"Calculated box size: {box} pixels for output pixel size {output_angpix} Å.")    
         cmd = [
             "WarpTools", "ts_export_particles",
             "--settings", "warp_tiltseries.settings",
@@ -66,16 +68,15 @@ class BaseRelionCombiner(BaseProcessor):
             "--output_star", str(output_star_path),
             "--output_angpix", str(output_angpix),
             "--output_processing", str(self.output_dir.resolve()),
-            "--box", "144",
+            "--box", str(box),
             "--diameter", "350",
             "--relative_output_paths",
-            "--device_list", "2",
-            "--perdevice", "4",
+            "--perdevice", "1",
             f"--{dimension}"
         ]
         
         log_path = self.output_dir / "logs" / f"{self.prefix}_extraction.log"
-        run_command(cmd, log_path, cwd=self.project_dir, env=env, module_load="warp/2.0.0dev34")
+        run_command(cmd, log_path, cwd=self.project_dir, env=env, module_load="warp/2.0.0dev36")
         
         self.logger.info(f"Particle extraction completed for {self.prefix}.")
         return output_star_path

@@ -15,4 +15,5 @@ Provides command-line tools through the following entry points:
 - process-warp2relion : Convert WARP files to RELION format
 - process-filter-by-ref : Filter STAR files by reference
 - star-class-distribution : Class distribution analysis
+- process-add-helical : Add helical IDs to STAR files
 """

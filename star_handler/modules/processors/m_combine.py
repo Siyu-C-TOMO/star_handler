@@ -39,7 +39,7 @@ class MCombineProcessor(BaseProcessor):
         super().__init__()
         self.star_file = Path(star_file).resolve()
         self.base_output_dir = Path(output_dir).resolve()
-        self.work_dir = self.base_output_dir / "ribo_2set_60S"
+        self.work_dir = self.base_output_dir / "HSC_2set_fromR3_7p48_to1p87"
         self.m_parameters = m_parameters if m_parameters else {}
         self.source_files_to_add = []
         self.modified_source_files = []
@@ -229,10 +229,10 @@ class MCombineProcessor(BaseProcessor):
                 ["MTools", "add_source", "--population", str(population_file), "--source", str(source_path)]
             )
 
-        # mask_output = self.work_dir / "mask.mrc"
-        # commands.append(
-        #     ["relion_mask_create", "--i", str(job_dir / "run_class001.mrc"), "--o", str(mask_output), "--ini_threshold", "2.5"]
-        # )
+        mask_output = self.work_dir / "mask.mrc"
+        commands.append(
+            ["relion_mask_create", "--i", str(job_dir / "run_class001.mrc"), "--o", str(mask_output), "--ini_threshold", "0.05"]
+        )
     
         commands.append(
             ["MTools", "create_species",
@@ -251,22 +251,21 @@ class MCombineProcessor(BaseProcessor):
         )
 
         mcore_common_args = ["--population", str(population_file)]
-        mcore_refine_args = ["--refine_imagewarp", "6x4", "--refine_particles", "--ctf_defocus"]
-        mcore_resource_args = ["--devicelist", "2", "--perdevice_refine", "4", "--perdevice_preprocess", "1", "--perdevice_postprocess", "1"]
+        mcore_refine_args = ["--iter", "5", "--refine_imagewarp", "4x4", "--refine_particles", "--ctf_defocus"]
+        mcore_resource_args = ["--perdevice_refine", "2", "--perdevice_preprocess", "1", "--perdevice_postprocess", "1"]
 
         commands.extend([
             ["MCore", *mcore_common_args, *mcore_resource_args, "--iter", "0"],
-            # ["MCore", *mcore_common_args, *mcore_refine_args, *mcore_resource_args, "--refine_tiltmovies"],
             ["MCore", *mcore_common_args, *mcore_refine_args, *mcore_resource_args, "--ctf_defocusexhaustive"],
             ["MCore", *mcore_common_args, *mcore_refine_args, *mcore_resource_args],
             ["MCore", *mcore_common_args, *mcore_refine_args, *mcore_resource_args, "--refine_stageangles"],
-            # ["MCore", *mcore_common_args, *mcore_refine_args, *mcore_resource_args, "--refine_mag", "--ctf_cs", "--ctf_zernike3"],
+            ["MCore", *mcore_common_args, *mcore_refine_args, *mcore_resource_args, "--refine_mag", "--ctf_cs", "--ctf_zernike3"],
             ["EstimateWeights", "--population", str(population_file), "--source", name, "--resolve_items"],
             ["MCore", *mcore_common_args, *mcore_resource_args],
             ["EstimateWeights", "--population", str(population_file), "--source", name, "--resolve_frames"],
             ["MCore", *mcore_common_args, *mcore_resource_args, "--refine_particles"],
-            # ["MTools", "resample_trajectories", "--population", str(population_file), "--species", str(self.work_dir / "species*" / f"{species}.species"), "--samples", "2"],
-            # ["MCore", *mcore_common_args, *mcore_resource_args, "--refine_stageangles", "--refine_mag", "--ctf_cs", "--ctf_zernike3"]
+            ["MTools", "resample_trajectories", "--population", str(population_file), "--species", str(self.work_dir / "species*" / f"{species}.species"), "--samples", "2"],
+            ["MCore", *mcore_common_args, *mcore_refine_args, *mcore_resource_args, "--refine_stageangles", "--refine_mag", "--ctf_cs", "--ctf_zernike3"]
         ])
 
         for index, cmd in enumerate(commands):

@@ -162,7 +162,7 @@ class TemplateMatch3DProcessor(BaseProcessor):
             particles = threshold_star(
                 particles,
                 'rlnAutopickFigureOfMerit',
-                min_val=0
+                min_val=cc
             )
             particles = threshold_star(
                 particles,

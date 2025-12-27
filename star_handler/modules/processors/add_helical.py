@@ -1,19 +1,19 @@
 from pathlib import Path
 from typing import Union
+import numpy as np
 
 from .base import BaseProcessor
 from ...utils.errors import FormatError, ProcessingError
 from ...core.io import format_input_star, format_output_star
-from ...core.transform import add_particle_names, merge_for_match
+from ...core.transform import merge_for_match
 
-class FilterByRefProcessor(BaseProcessor):
+class AddHelByRefProcessor(BaseProcessor):
     """Filter particles in STAR file based on a reference STAR file.
     
     [WORKFLOW]
     1. Check if input STAR files exist and are valid
     2. Read and format both reference and full STAR files
-    3. Add particle names to both datasets for matching
-    4. Match particles based on optics group and particle name
+    4. Merge and add helical ID based on three rotation angles and particle name
     5. Save matched particles to output star file
 
     [PARAMETERS]
@@ -29,14 +29,11 @@ class FilterByRefProcessor(BaseProcessor):
     - File named as original_name_matched.star
 
     [EXAMPLE]
-    Basic usage:
-        $ star-handler process-filter-by-match -f particles.star -r reference.star
-    
     Custom output directory:
-        $ star-handler process-filter-by-match -f particles.star -r reference.star -o filtered_results
+        $ star-handler process-add-column-by-ref -f particles.star -r reference.star -o added_columns
     """
   
-    def __init__(self, full_star: str, ref_star: str, output_dir: str = 'matched'):
+    def __init__(self, full_star: str, ref_star: str, output_dir: str = 'added'):
         """Initialize processor with full and ref star file paths.
 
         [PARAMETERS]
@@ -45,7 +42,7 @@ class FilterByRefProcessor(BaseProcessor):
         ref_star : str
             Path to the reference star file
         output_dir : str, optional
-            Directory to save output files (default: 'matched')
+            Directory to save output files (default: 'added')
             
         [RAISES]
         FormatError
@@ -57,6 +54,7 @@ class FilterByRefProcessor(BaseProcessor):
         self.full_star = full_star
         self.ref_star = ref_star
         self.output_dir = output_dir
+        self.matching_keys = ['rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi','rlnMicrographName']
         
     def _validate_column_requirements(self, full_data: dict, ref_data: dict) -> None:
         """Validate required columns exist in both datasets.
@@ -71,8 +69,8 @@ class FilterByRefProcessor(BaseProcessor):
         FormatError
             If required columns are missing
         """
-        required_cols = ['rlnOpticsGroup']
-        for col in required_cols:
+
+        for col in self.matching_keys:
             if col not in full_data['particles'].columns:
                 raise FormatError(f"Missing required column {col} in full star file")
             if col not in ref_data['particles'].columns:
@@ -102,20 +100,29 @@ class FilterByRefProcessor(BaseProcessor):
             ref_data = format_input_star(self.ref_star)
             
             self._validate_column_requirements(full_data, ref_data)
-            
-            self.logger.info("Processing particle data...")
-            full_particles_with_name = add_particle_names(full_data['particles'])
-            ref_particles_with_name = add_particle_names(ref_data['particles'])
-            ref_particles_selector = ref_particles_with_name[['rlnOpticsGroup',
-                                                            'particle_name']]
+
+            ref_to_merge = ref_data['particles'][self.matching_keys+['rlnHelicalTubeID']]
+
+            angle_cols = ['rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi']
+            ref_to_merge[angle_cols] = ref_to_merge[angle_cols].round(3)
+            full_data['particles'][angle_cols] = full_data['particles'][angle_cols].round(3)
 
             self.logger.info("Matching particles...")
             matched_particles = merge_for_match(
-                ref_particles=ref_particles_selector,
-                full_particles=full_particles_with_name,
-                merge_keys=['rlnOpticsGroup', 'particle_name'],
+                ref_particles=ref_to_merge,
+                full_particles=full_data['particles'],
+                merge_keys=self.matching_keys,
                 keep_unmatched=False
             )
+            if 'rlnOpticsGroup' not in matched_particles:
+                matched_particles['rlnOpticsGroup'] = 1
+            matched_particles['rlnAngleTiltPrior'] = matched_particles['rlnAngleTilt']
+            matched_particles['rlnAnglePsiPrior'] = matched_particles['rlnAnglePsi']
+            matched_particles['rlnHelicalTrackLengthAngst'] = 0
+            spacing = 82.0
+            for tube_id, group in matched_particles.groupby('rlnHelicalTubeID'):
+                matched_particles.loc[group.index, 'rlnHelicalTrackLengthAngst'] = np.arange(len(group)) * spacing
+            matched_particles['rlnAnglePsiFlipRatio'] = 0.9
             
             self.logger.info(f"Found {len(matched_particles)} matching particles")
 
@@ -128,7 +135,7 @@ class FilterByRefProcessor(BaseProcessor):
             matched_star_file = {}
             if 'optics' in full_data:
                 matched_star_file['optics'] = full_data['optics']
-            matched_star_file['particles'] = matched_particles[full_data['particles'].columns]
+            matched_star_file['particles'] = matched_particles
             format_output_star(matched_star_file, output_path)
             
             self.logger.info(f"Successfully saved to: {output_path}")

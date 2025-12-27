@@ -94,6 +94,16 @@ class Relion5PrepProcessor(BaseRelionCombiner):
             self.logger.info(f"Renamed '{source_psd.name}' to '{new_name.name}'")
         else:
             self.logger.warning(f"Directory not found, skipping rename: {source_psd}")
+    
+    @staticmethod
+    def _needs_prefix(series: pd.Series, prefix: str) -> bool:
+        """Return True if this column requires prefix (all non-digit-starting)."""
+        starts = series.str.match(r'\d', na=False)
+
+        if starts.nunique() > 1:
+            raise ValueError(f"Mixed format in {series.name}: some start with digit, some do not.")
+
+        return not starts.iloc[0]
 
     def _process_tomograms_star(self) -> Dict[str, pd.DataFrame]:
         """Process the tomograms STAR file."""
@@ -105,13 +115,20 @@ class Relion5PrepProcessor(BaseRelionCombiner):
         
         processed_data = {}
         for key, df in tomo_data.items():
+            add_prefix = False
             if 'rlnTomoName' in df.columns:
-                df['rlnTomoName'] = self.prefix + '_' + df['rlnTomoName'].astype(str)
+                add_prefix = self._needs_prefix(df['rlnTomoName'], self.prefix)
+                if add_prefix:
+                    df['rlnTomoName'] = f"{self.prefix}_" + df['rlnTomoName'].astype(str)
+
             if 'rlnOpticsGroupName' in df.columns:
                 df['rlnOpticsGroupName'] = self.prefix
-            new_key = key
-            if key.endswith('.tomostar'):
-                new_key = f"{self.prefix}_{key}"
+
+            new_key = (
+                f"{self.prefix}_{key}"
+                if add_prefix and key.endswith('.tomostar')
+                else key
+            )
             processed_data[new_key] = df
 
         format_output_star(processed_data, self.output_dir / f"{self.prefix}_tomograms.star")
@@ -146,10 +163,15 @@ class Relion5PrepProcessor(BaseRelionCombiner):
 
         if 'particles' in particle_data:
             particles_df = particle_data['particles']
-            cols_to_prefix = ['rlnTomoName', 'rlnTomoParticleName', 'rlnImageName']
-            for col in cols_to_prefix:
+            if 'rlnImageName' in particles_df.columns:
+                particles_df['rlnImageName'] = f"{self.prefix}_" + particles_df['rlnImageName'].astype(str)
+
+            cols_numeric_logic = ['rlnTomoName', 'rlnTomoParticleName']
+            for col in cols_numeric_logic:
                 if col in particles_df.columns:
-                    particles_df[col] = self.prefix + '_' + particles_df[col].astype(str)
+                    if self._needs_prefix(particles_df[col], self.prefix):
+                        particles_df[col] = f"{self.prefix}_" + particles_df[col].astype(str)
+
             particles_df['rlnOpticsGroup'] = new_optics_group_id
             particle_data['particles'] = particles_df
             self.logger.info("Processed particles data: added prefixes and set rlnOpticsGroup.")

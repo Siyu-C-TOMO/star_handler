@@ -182,9 +182,10 @@ def merge_for_match(ref_particles: pd.DataFrame,
         merged = merged.drop_duplicates(subset=merge_keys)
         
         if keep_unmatched:
-            unmatched = merged[merged['rlnImageName_full'].isna()]
+            unmatched = merged[merged[merge_keys[0]].isna()]
             if not unmatched.empty:
                 print(f"Warning: {len(unmatched)} unmatched particles")
+                print(unmatched.head(2).to_string())
                 
         return merged
     except Exception as e:
