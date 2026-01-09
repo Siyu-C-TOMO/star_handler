@@ -69,11 +69,14 @@ class BaseRelionCombiner(BaseProcessor):
             "--output_angpix", str(output_angpix),
             "--output_processing", str(self.output_dir.resolve()),
             "--box", str(box),
+            # "--box", "144",
             "--diameter", "350",
             "--relative_output_paths",
-            "--perdevice", "1",
+            "--perdevice", "4",
             f"--{dimension}"
         ]
+        if dimension == "2d":
+            cmd.extend(["--max_missing_tilts", "999"])
         
         log_path = self.output_dir / "logs" / f"{self.prefix}_extraction.log"
         run_command(cmd, log_path, cwd=self.project_dir, env=env, module_load="warp/2.0.0dev36")

@@ -114,12 +114,10 @@ class Relion5PrepProcessor(BaseRelionCombiner):
         tomo_data = format_input_star(self.tomograms_star_path)
         
         processed_data = {}
+        add_prefix = self._needs_prefix(tomo_data['global']['rlnTomoName'], self.prefix)
         for key, df in tomo_data.items():
-            add_prefix = False
-            if 'rlnTomoName' in df.columns:
-                add_prefix = self._needs_prefix(df['rlnTomoName'], self.prefix)
-                if add_prefix:
-                    df['rlnTomoName'] = f"{self.prefix}_" + df['rlnTomoName'].astype(str)
+            if add_prefix and 'rlnTomoName' in df.columns:
+                df['rlnTomoName'] = f"{self.prefix}_" + df['rlnTomoName'].astype(str)
 
             if 'rlnOpticsGroupName' in df.columns:
                 df['rlnOpticsGroupName'] = self.prefix
@@ -234,7 +232,7 @@ class Relion5PrepProcessor(BaseRelionCombiner):
                 )
             else:
                 combined_tomo_data[key] = new_df
-
+        combined_tomo_data['global']['rlnSphericalAberration'] = 2.7  # Update C_s value
         format_output_star(combined_tomo_data, combine_tomo_path)
         self.logger.info(f"Successfully merged and saved to {combine_tomo_path}")
 
