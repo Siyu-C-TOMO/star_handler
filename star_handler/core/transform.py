@@ -134,7 +134,8 @@ def add_particle_names(particles: pd.DataFrame) -> pd.DataFrame:
 def merge_for_match(ref_particles: pd.DataFrame,
                    full_particles: pd.DataFrame,
                    merge_keys: List[str] = ['rlnOpticsGroup', 'particle_name'],
-                   keep_unmatched: bool = False) -> pd.DataFrame:
+                   keep_unmatched: bool = False,
+                   drop_duplicates: bool = True) -> pd.DataFrame:
     """Merge reference particles with full dataset.
     
     [WORKFLOW]
@@ -179,7 +180,8 @@ def merge_for_match(ref_particles: pd.DataFrame,
             suffixes=('_ref', '_full')
         )
         
-        merged = merged.drop_duplicates(subset=merge_keys)
+        if drop_duplicates:
+            merged = merged.drop_duplicates(subset=merge_keys)
         
         if keep_unmatched:
             unmatched = merged[merged[merge_keys[0]].isna()]
