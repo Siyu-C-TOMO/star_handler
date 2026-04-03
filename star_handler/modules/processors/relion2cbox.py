@@ -178,16 +178,17 @@ class Relion2CboxProcessor(BaseProcessor):
         """
         box_size = star_data['optics']['rlnImageSize'][0]
         
+        shifted_coords, _ = apply_shift(star_data)
         if self.bin_factor != 1:
-            star_data['particles'] = scale_coord(
-                star_data['particles'],
+            shifted_coords = scale_coord(
+                shifted_coords,
                 self.bin_factor,
                 self.bin_factor,
                 self.bin_factor
             )
         
-        shift_result = apply_shift(star_data)
-        coord = np.array(shift_result[0]).astype(int)
+        coord = np.array(shifted_coords[['rlnCoordinateX', 'rlnCoordinateY', 'rlnCoordinateZ']]).astype(int)
+        
         return coord, box_size
         
     def _save_COORD(self, coord: np.ndarray, 
