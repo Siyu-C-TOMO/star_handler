@@ -31,12 +31,19 @@ HELP, EPILOG = parse_docstring(FilterByRefProcessor.__doc__)
     type=click.Path(file_okay=False, dir_okay=True, writable=True),
     help="Output directory for filtered files"
 )
-def main(star_file: str, ref_star: str, output_dir: str):
+@click.option(
+    "--save-remainder",
+    is_flag=True,
+    default=False,
+    help="Also save unmatched particles to a _remainder.star file."
+)
+def main(star_file: str, ref_star: str, output_dir: str, save_remainder: bool):
     try:
         processor = FilterByRefProcessor(
             star_file,
             ref_star,
-            output_dir=output_dir
+            output_dir=output_dir,
+            save_remainder=save_remainder
         )
         output_path = processor.process()
         logger.info(f"Successfully filtered particles. Output saved to: {output_path}")

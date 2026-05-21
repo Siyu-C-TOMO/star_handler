@@ -67,6 +67,7 @@ class TemplateMatch3DProcessor(BaseProcessor):
         else:
             self._generate_blank_list()
             self._prepare_for_napari()
+            self.logger.info("Prepared scaled stars. Remember to rename for exact matches!")
             
     def _generate_blank_list(self) -> None:
         """Generate ribo_list_blank.txt with star prefixes.
@@ -153,11 +154,10 @@ class TemplateMatch3DProcessor(BaseProcessor):
             (prefix, error_message if any)
         """
         prefix, low_z, high_z, cc = params
-        
+
         try:
-            star_file = next(self.scaled_dir.glob(f"{prefix}*.star"))
+            star_file = next(self.scaled_dir.glob(f"{prefix}.star"))
             star_data = format_input_star(star_file)
-            
             particles = star_data['particles']
             particles = threshold_star(
                 particles,
