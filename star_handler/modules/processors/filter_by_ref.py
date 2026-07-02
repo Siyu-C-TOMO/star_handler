@@ -117,14 +117,16 @@ class FilterByRefProcessor(BaseProcessor):
             self.logger.info("Processing particle data...")
             full_particles_with_name = add_particle_names(full_data['particles'])
             ref_particles_with_name = add_particle_names(ref_data['particles'])
-            ref_particles_selector = ref_particles_with_name[['rlnOpticsGroup',
-                                                            'particle_name']]
+            # ref_particles_selector = ref_particles_with_name[['rlnOpticsGroup',
+            #                                                 'particle_name']]
+            ref_particles_selector = ref_particles_with_name[['particle_name']]
 
             self.logger.info("Matching particles...")
             matched_particles = merge_for_match(
                 ref_particles=ref_particles_selector,
                 full_particles=full_particles_with_name,
-                merge_keys=['rlnOpticsGroup', 'particle_name'],
+                # merge_keys=['rlnOpticsGroup', 'particle_name'],
+                merge_keys=['particle_name'],
                 keep_unmatched=False
             )
             
@@ -147,7 +149,8 @@ class FilterByRefProcessor(BaseProcessor):
             if self.save_remainder:
                 all_merged = full_particles_with_name.merge(
                     ref_particles_selector,
-                    on=['rlnOpticsGroup', 'particle_name'],
+                    # on=['rlnOpticsGroup', 'particle_name'],
+                    on = ['particle_name'],
                     how='left',
                     indicator=True
                 )

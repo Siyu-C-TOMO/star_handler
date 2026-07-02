@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -6,6 +7,17 @@ from ...core.io import format_input_star, format_output_star
 from ...core.transform import scale_coord
 from ...core.selection import threshold_star
 from ...core.parallel import parallel_process_tomograms
+
+def _tomo_prefix(stem: str) -> str:
+    """Strip angpix suffix (e.g. _12.48Apx_ini) from a star file stem.
+    Falls back to first 4 underscore-parts for old L1_sq1_G1_ts_001 naming.
+    """
+    parts = stem.split('_')
+    for i, part in enumerate(parts):
+        if re.match(r'\d+\.\d+Apx', part):
+            return '_'.join(parts[:i])
+    return '_'.join(parts[:4])
+
 
 class TemplateMatch3DProcessor(BaseProcessor):
     """
@@ -84,9 +96,7 @@ class TemplateMatch3DProcessor(BaseProcessor):
             
         prefixes = []
         for star in star_files:
-            parts = star.stem.split('_')
-            prefix = '_'.join(parts[:4])
-            prefixes.append(prefix)
+            prefixes.append(_tomo_prefix(star.stem))
             
         with open(self.blank_list, 'w') as f:
             for prefix in sorted(set(prefixes)):
@@ -112,7 +122,7 @@ class TemplateMatch3DProcessor(BaseProcessor):
                 *self.SCALE_FACTORS
             )
             
-            output_path = self.scaled_dir / star_file.name
+            output_path = self.scaled_dir / f"{_tomo_prefix(star_file.stem)}.star"
             format_output_star(star_data, output_path)
             return star_file.name, None
             
